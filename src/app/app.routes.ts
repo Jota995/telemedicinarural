@@ -8,5 +8,13 @@ export const routes: Routes = [
     {
         path:'historial-medico',
         loadComponent: () => import('./pages/historial-medico/historial-medico.component').then(mod => mod.HistorialMedicoComponent)
+    },
+    {
+        path:'agenda',
+        loadComponent: () => import('./pages/agenda/agenda.component').then(mod => mod.AgendaComponent)
+    },
+    {
+        path:'agendar-cita',
+        loadComponent: () => import('./pages/agendar-cita/agendar-cita.component').then(mod => mod.AgendarCitaComponent)
     }
 ];
