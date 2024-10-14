@@ -14,6 +14,30 @@ import { DataViewModule } from 'primeng/dataview';
   styleUrl: './historial-medico.component.css'
 })
 export class HistorialMedicoComponent {
+
+  public prescripcionesMedicas:Array<any> = [
+    {
+      medicamento:'Medicina A',
+      dosis:'500mg'
+    },
+    {
+      medicamento:'Medicina B',
+      dosis:'500mg'
+    }
+  ]
+
+  public notasDelDoctor:Array<any> = [
+    {
+      doctor:'Dr. Johnson',
+      nota:'El paciente responde bien a la medicación.'
+    },
+    {
+      doctor:'Dr. Smith',
+      nota:'Se sugiere cita de seguimiento en dos semanas.'
+    }
+  ]
+
+
   public alergias = [
     {
       'nombre': 'Alergia Maní',

@@ -16,5 +16,9 @@ export const routes: Routes = [
     {
         path:'agendar-cita',
         loadComponent: () => import('./pages/agendar-cita/agendar-cita.component').then(mod => mod.AgendarCitaComponent)
+    },
+    {
+        path:'examenes-medicos',
+        loadComponent: () => import('./pages/examenes-medicos/examenes-medicos.component').then(mod => mod.ExamenesMedicosComponent)
     }
 ];

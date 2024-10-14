@@ -1,51 +1,52 @@
-<main class="flex flex-column">
+<main class="flex flex-column p-3">
+    <h1>Historial Medico</h1>
+    <section>
+        <h3>Datos del paciente</h3>
+        <div class="flex flex-column">
+            <ul>
+                <li><b>Nombre:</b> Jorge Perez</li>
+                <li><b>Edad:</b> 32 años</li>
+                <li><b>Fecha Nacimiento:</b> 12/03/1995</li>
+                <li><b>Genero:</b> Masculino</li>
+                <li><b>Estado Civil:</b> Casado</li>
+                <li><b>Nacionalidad:</b> Chileno</li>
+            </ul>
+        </div>
+    </section>
     <section>
         <h3>Historial de Prescripciones</h3>
         <div class="flex gap-2">
-            <p-card subheader="Medicina A" [style]="{ width: '160px', height:'100' }">
-                <ng-template pTemplate="header">
-                    <img alt="Card" src="https://primefaces.org/cdn/primeng/images/card-ng.jpg" />
-                </ng-template>
-                <p>
-                    Dosis: 500mg
-                </p>
-            </p-card>
-            <p-card subheader="Medicina B" [style]="{ width: '160px', height:'100' }">
-                <ng-template pTemplate="header">
-                    <img alt="Card" src="https://primefaces.org/cdn/primeng/images/card-ng.jpg" />
-                </ng-template>
-                <p>
-                    Dosis: 500mg
-                </p>
-            </p-card>
+            @for (item of prescripcionesMedicas; track $index) {
+                <div class="p-card h-12rem">
+                    <div class="p-card-header h-8rem">
+                        <img class="h-full" alt="Card" src="https://primefaces.org/cdn/primeng/images/card-ng.jpg" />
+                        
+                    </div>
+                    <div class="p-card-content flex flex-column align-items-center">
+                        <small>{{item.medicamento}}</small>
+                        <span class="font-bold">Dosis: {{item.dosis}}</span>
+                    </div>
+                </div>
+            }
         </div>
     </section>
     <section>
         <h3>Notas del doctor</h3>
         <div class="flex gap-2">
-            <p-card [style]="{ width: '260px', height:'100' }">
-                <div class="flex align-items-center mb-3">
-                    <p-avatar 
-                    label="P" 
-                    styleClass="mr-2" 
-                    shape="circle" />
-                    <small>Dr. Johnson</small>
-                </div>
-                <span>El paciente responde bien a la medicación.</span>
-            </p-card>
-            <p-card [style]="{ width: '260px', height:'100' }">
-                <div class="flex align-items-center mb-3">
-                    <p-avatar 
-                    label="P" 
-                    styleClass="mr-2" 
-                    shape="circle" />
-                    <small>Dr. Smith</small>
-                </div>
-                <span>Se sugiere cita de
-                    seguimiento en 
-                   dos semanas.</span>
-            </p-card>
+            @for (item of notasDelDoctor; track $index) {
+                <p-card styleClass="w-16rem">
+                    <div class="flex align-items-center mb-3">
+                        <p-avatar 
+                        label="P" 
+                        styleClass="mr-2" 
+                        shape="circle" />
+                        <small>{{item.doctor}}</small>
+                    </div>
+                    <span>{{item.nota}}</span>
+                </p-card>
+            }
         </div>
+        
     </section>
     <section>
         <h3>Alergias</h3>
