@@ -1,0 +1,23 @@
+<form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-column gap-4 align-items-center justify-content-center h-screen w-full pl-4 pr-4">
+    <h1>Iniciar Seccion</h1>
+    <section class="flex flex-column gap-2 w-full">
+        <label class="font-bold	">Email</label>
+        <p-iconField styleClass="w-full" iconPosition="left">
+            <p-inputIcon styleClass="pi pi-user" />
+            <input formControlName="email" type="email" pInputText placeholder="Email" class="w-full"/>
+        </p-iconField>
+    </section>
+    <section class="flex flex-column gap-2 w-full">
+        <label for="email" class="font-bold	">Contraseña</label>
+        <p-iconField iconPosition="left">
+            <p-inputIcon styleClass="pi pi-lock" />
+            <input formControlName="password" type="password" pInputText placeholder="Password" class="w-full"/>
+        </p-iconField>
+    </section>
+    <section class="w-full mt-6">
+        <p-button type="submit" styleClass="w-full" label="Ingresar" class="font-bold"/>
+    </section>
+    <section class="w-full text-center mt-3">
+        <a href="#">¿Olvidaste tu contraseña?</a>
+    </section>
+</form>

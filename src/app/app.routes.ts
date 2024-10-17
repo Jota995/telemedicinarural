@@ -1,24 +1,28 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/auth/guards/auth.guard';
 
 export const routes: Routes = [
     {
-        path:'home',
-        loadComponent: () => import('./pages/home/home.component').then(mod => mod.HomeComponent)
+        path:'app',
+        loadComponent: () => import('./core/layouts/app-layout/app-layout.component').then(m => m.AppLayoutComponent),
+        canActivate:[authGuard],
+        children:[
+            {
+                path:'home',
+                loadComponent:() => import('./core/pages/home/home.component').then(mod => mod.HomeComponent)
+            },
+            {
+                path:'agenda',
+                loadChildren: () => import('./modules/agenda/agenda.routes').then(mod => mod.routes)
+            }
+        ],
     },
     {
-        path:'historial-medico',
-        loadComponent: () => import('./pages/historial-medico/historial-medico.component').then(mod => mod.HistorialMedicoComponent)
+        path:'auth',
+        loadChildren: () => import('./core/auth/auth.routes').then(m => m.routes)
     },
     {
-        path:'agenda',
-        loadComponent: () => import('./pages/agenda/agenda.component').then(mod => mod.AgendaComponent)
-    },
-    {
-        path:'agendar-cita',
-        loadComponent: () => import('./pages/agendar-cita/agendar-cita.component').then(mod => mod.AgendarCitaComponent)
-    },
-    {
-        path:'examenes-medicos',
-        loadComponent: () => import('./pages/examenes-medicos/examenes-medicos.component').then(mod => mod.ExamenesMedicosComponent)
+        path:'**',
+        redirectTo:'/app/home'
     }
 ];
