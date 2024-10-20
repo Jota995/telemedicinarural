@@ -7,6 +7,9 @@ import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { TieredMenuModule } from 'primeng/tieredmenu';
 import { AuthService } from '../../auth/services/auth.service';
+import { UserService } from '../../services/user.service';
+import { Observable } from 'rxjs';
+import { User } from '../../models/user.model';
 
 @Component({
   selector: 'app-navbar',
@@ -14,15 +17,19 @@ import { AuthService } from '../../auth/services/auth.service';
   imports: [MenubarModule,AvatarModule,BadgeModule,CommonModule,ButtonModule,TieredMenuModule],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css',
-  providers:[AuthService]
+  providers:[AuthService,UserService]
 })
 export class NavbarComponent implements OnInit {
   authService = inject(AuthService)
+  userService = inject(UserService)
 
   items: MenuItem[] | undefined;
   userItems:MenuItem[] | undefined;
+  user$!:Observable<User>
 
   ngOnInit(): void {
+    this.user$= this.userService.getUser();
+
     this.items = [
             {
                 label: 'Home',

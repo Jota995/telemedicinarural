@@ -13,13 +13,13 @@
             </a>
         </ng-template>
         <ng-template pTemplate="end">
-            <div class="flex align-items-center gap-2">
+            <div *ngIf="user$ | async as userData" class="flex align-items-center gap-2">
                 <p-avatar image="https://primefaces.org/cdn/primeng/images/demo/avatar/walter.jpg" shape="circle" />
-                <div class="flex flex-column">
-                    <span>Pedro Sanchez</span>
-                    <small>Doctor</small>
+                <div  class="flex flex-column">
+                    <span>{{userData.Name}}</span>
+                    <small>{{userData.Role}}</small>
                 </div>
-                <p-button [text]="true" icon="pi pi-angle-down" severity="secondary" (onClick)="menuUser.toggle($event)" />
+                <p-button [text]="true" [rounded]="true" icon="pi pi-angle-down" severity="secondary" (onClick)="menuUser.toggle($event)" />
                 <p-tieredMenu #menuUser [model]="userItems" [popup]="true" />
             </div>
         </ng-template>
