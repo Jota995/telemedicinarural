@@ -15,7 +15,7 @@
         </section>
         <section>
             <h3>Historial de Prescripciones</h3>
-            <div class="flex gap-2">
+            <div class="flex gap-2 overflow-y-scroll">
                 @for (item of historial?.historialPrescripciones; track $index) {
                     <div class="p-card h-12rem">
                         <div class="p-card-header h-8rem">
@@ -35,7 +35,7 @@
         </section>
         <section>
             <h3>Notas del doctor</h3>
-            <div class="flex gap-2">
+            <div class="flex gap-2 overflow-y-auto">
                 @for (item of notasDelDoctor; track $index) {
                     <p-card styleClass="w-16rem">
                         <div class="flex align-items-center mb-3">
