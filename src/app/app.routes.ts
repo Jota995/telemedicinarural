@@ -16,6 +16,10 @@ export const routes: Routes = [
             {
                 path:'agenda',
                 loadChildren: () => import('./modules/agenda/agenda.routes').then(mod => mod.routes)
+            },
+            {
+                path:'historial-medico',
+                loadChildren: () => import('./modules/expediente-medico/expediente-medico.routes').then(m => m.routes)
             }
         ],
     },

@@ -1,9 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { AvatarModule } from 'primeng/avatar';
 import { AvatarGroupModule } from 'primeng/avatargroup';
 import { CardModule } from 'primeng/card';
 import { DataViewModule } from 'primeng/dataview';
+import { Observable, tap } from 'rxjs';
+import { RxDatabaseService } from '../../../../core/services/database.service';
+import { ActivatedRoute } from '@angular/router';
 
 
 @Component({
@@ -11,9 +14,43 @@ import { DataViewModule } from 'primeng/dataview';
   standalone: true,
   imports: [AvatarModule,AvatarGroupModule,CardModule,DataViewModule,CommonModule],
   templateUrl: './historial-medico.component.html',
-  styleUrl: './historial-medico.component.css'
+  styleUrl: './historial-medico.component.css',
+  providers:[RxDatabaseService]
 })
-export class HistorialMedicoComponent {
+export class HistorialMedicoComponent implements OnInit {
+  private databaseService = inject(RxDatabaseService)
+  private activateRotue = inject(ActivatedRoute)
+  
+  public emmitedFirst = false;
+  public historialMedico$!:Observable<any>;
+  private idHistorial!:string | null
+
+  ngOnInit(): void {
+    this.idHistorial = this.activateRotue.snapshot.paramMap.get('idHistorial')
+    
+    this.historialMedico$ = this.databaseService.db.historialmedico.findOne({
+      selector:{
+        id: this.idHistorial
+      }
+    })
+    .$
+    .pipe(
+      tap(async (result)=>{
+        if(!this.emmitedFirst) this.emmitedFirst= true
+        if (result) {
+          result.paciente = await result.populate('idPaciente')
+
+          for (const consulta of result.consultasMedicas || []) {
+            consulta.doctor = await this.databaseService.db.doctor.findOne({
+                selector: { id: consulta.idDoctor }
+            }).exec();
+          }
+
+          console.log("result",result)
+        }
+      })
+    )
+  }
 
   public prescripcionesMedicas:Array<any> = [
     {
