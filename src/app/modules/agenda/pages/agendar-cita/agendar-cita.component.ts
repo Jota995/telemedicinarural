@@ -7,6 +7,8 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Observable, tap } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
 import { CalendarModule } from 'primeng/calendar';
+import { RxDoctorCollecion } from '../../../../core/RxDB';
+import { RxDocument } from 'rxdb';
 
 
 
@@ -34,10 +36,15 @@ export class AgendarCitaComponent implements OnInit {
   public citasProgramadasEnElMes!:Observable<any>
 
   public minDate = new Date()
+  public maxDate!:Date;
 
   public minHour = new Date()
   public maxHour = new Date()
   public defaultDate: Date = new Date();
+
+  public agendaDoctor:Array<Date> = []
+
+  public horasAgendar:Array<{}> = []
 
   
 
@@ -65,7 +72,20 @@ export class AgendarCitaComponent implements OnInit {
       .find()
       .$
       .pipe(
-        tap(values => console.log("values", values))
+        tap((values:Array<any>) => {
+          const agenda = values[0].agenda.map((date:string) => new Date(date))
+          this.maxDate = new Date(Math.max(...agenda.map((fecha:Date) => fecha.getTime())));
+          this.agendaDoctor = this.generarFechasDeshabilitadas(agenda)
+          this.horasAgendar = agenda.map((fecha:Date) => {
+            const horas = fecha.getHours().toString().padStart(2, '0'); // Asegurarse de que tenga 2 dígitos
+            const minutos = fecha.getMinutes().toString().padStart(2, '0'); // Asegurarse de que tenga 2 dígitos
+          
+            return {
+              hora: `${horas}:${minutos} hrs`,  // Formato "HH:MM"
+              fecha: fecha                  // Fecha original
+            };
+          });
+        })
       )
 
     this.citasProgramadasEnElMes = this.dbService
@@ -114,5 +134,36 @@ export class AgendarCitaComponent implements OnInit {
     nuevaFecha.setMilliseconds(0);  // Opcional: ajustar milisegundos
   
     return nuevaFecha.toISOString();
+  }
+
+  generarFechasDeshabilitadas(fechasPermitidas: Date[]): Date[] {
+    const fechasDeshabilitadas: Date[] = [];
+  
+    // Rango mínimo es "hoy"
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0); // Asegurarse que el tiempo sea 00:00:00
+    
+    // Rango máximo es la última fecha del array de fechas permitidas
+    const fechaMaxima = new Date(Math.max(...fechasPermitidas.map(f => f.getTime())));
+    fechaMaxima.setHours(0, 0, 0, 0); // Ajustar la hora a 00:00:00
+    
+    // Empezamos desde "hoy" y recorremos hasta la fecha máxima
+    let fechaActual = new Date(hoy);
+  
+    while (fechaActual <= fechaMaxima) {
+      // Convertir fecha actual a formato ISO para comparar solo las fechas (sin horas)
+      const fechaISO = fechaActual.toISOString().split('T')[0];
+  
+      // Verificar si la fecha actual NO está en el array de fechas permitidas
+      if (!fechasPermitidas.some(f => f.toISOString().split('T')[0] === fechaISO)) {
+        // Si no está en el array de fechas permitidas, agregarla al array de fechas deshabilitadas
+        fechasDeshabilitadas.push(new Date(fechaActual));
+      }
+  
+      // Avanzar un día
+      fechaActual.setDate(fechaActual.getDate() + 1);
+    }
+  
+    return fechasDeshabilitadas;
   }
 }

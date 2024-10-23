@@ -5,12 +5,12 @@ import { ButtonModule } from 'primeng/button';
 import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { RxDatabaseService } from '../../../../core/services/database.service';
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-agenda',
   standalone: true,
-  imports: [AvatarModule,CardModule,ButtonModule,RouterModule, AsyncPipe],
+  imports: [AvatarModule,CardModule,ButtonModule,RouterModule, AsyncPipe,DatePipe],
   templateUrl: './agenda.component.html',
   styleUrl: './agenda.component.css',
   providers:[RxDatabaseService]

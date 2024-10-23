@@ -1,5 +1,8 @@
 <main class="flex flex-column p-3">
     <h1>Citas Medicas</h1>
+    <section class="mb-5">
+        <a routerLink="/app/agenda/agendar-cita" class="p-button font-bold w-full mt-4 p-button-raised p-button-contrast">Agendar cita medica</a>
+    </section>
     <section class="flex flex-column gap-2">
         <h3>Consultar citas</h3>
         <div class="flex gap-2 overflow-scroll">
@@ -43,7 +46,7 @@
     </section>
     <section>
         <h3>Proximas Citas</h3>
-        <div class="flex gap-2">
+        <div class="flex gap-2 overflow-scroll">
             @for (cita of proximasCitas$ | async ; track $index) {
                 <p-card [style]="{ width: '160px', height:'20' }">
                     <ng-template pTemplate="content" >
@@ -52,10 +55,13 @@
                                 label="P" 
                                 styleClass="mr-2" 
                                 shape="circle" />
-                                <small>{{cita?.fecha}}</small>
+                                <small>{{ cita?.fecha | date: 'dd/MM/yyyy' }} - {{ cita?.fecha | date: 'shortTime' }}</small>
                         </div>
                     </ng-template>
                 </p-card>
+            }
+            @empty {
+                <p>No hay citas registradas.</p>
             }
         </div>
     </section>
@@ -70,7 +76,5 @@
             </ng-template>
         </p-card>
     </section>
-    <section>
-        <a routerLink="/app/agenda/agendar-cita" class="p-button font-bold w-full mt-4 p-button-raised p-button-contrast">Agendar cita medica</a>
-    </section>
+    
 </main>

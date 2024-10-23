@@ -24,22 +24,23 @@
         <p-calendar 
             formControlName="fecha"
             [minDate]="minDate"
+            [maxDate]="maxDate"
+            [disabledDates]="agendaDoctor"
+            touchUI="true"
             dateFormat="dd/mm/yy"
             placeholder="Seleccione un dia a agendar"
             styleClass="w-full" />
     </section>
     <section>
         <h4>Hora</h4>
-        <p-calendar 
-                formControlName="hora" 
-                [timeOnly]="true"
-                [stepHour]="1"
-                [stepMinute] = "60"
-                [minDate]="minHour"
-                [maxDate]="maxHour"
-                [defaultDate]="defaultDate"
-                placeholder="Seleccione una hora a agendar"
-                styleClass="w-full"/>
+        <p-dropdown 
+            formControlName="hora" 
+            placeholder="Seleccione una hora disponible"
+            [options]="horasAgendar"
+            [checkmark]="true"
+            optionLabel="hora"
+            optionValue="fecha"
+            styleClass="w-full" />
     </section>
     <section>
         <h4>Motivo</h4>

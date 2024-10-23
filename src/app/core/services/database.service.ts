@@ -85,6 +85,7 @@ async function seedDb(database:RxTelemedicinaDb){
                     'neurologia',
                     'cardiologia'
                 ],
+                agenda: generarFechas('2024-10-25T08:00:00',1),
                 createdAt: new Date().toISOString()
             }
 
@@ -148,6 +149,28 @@ export async function initDatabase() {
 
     await initState;
 }
+
+function generarFechas(dia:string, intervaloHoras:number):Array<string> {
+    // Crear un array para almacenar las fechas generadas
+    const fechas = [];
+    
+    // Convertir el día en un objeto Date (si es que no es un objeto Date)
+    const fechaBase = new Date(dia);
+  
+    // Generar las 6 fechas
+    for (let i = 0; i < 6; i++) {
+      // Crear una nueva fecha a partir de la fecha base
+      const nuevaFecha = new Date(fechaBase);
+      
+      // Sumar el intervalo de horas para cada iteración
+      nuevaFecha.setHours(nuevaFecha.getHours() + (i * intervaloHoras));
+      
+      // Agregar la fecha al array
+      fechas.push(nuevaFecha.toISOString());
+    }
+  
+    return fechas;
+  }
 
 
 @Injectable()

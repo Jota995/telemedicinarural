@@ -33,8 +33,15 @@ export const DOCTOR_SCHEMA_LITERAL = {
             items:{
                 type:'string'
             }
-        }
-        ,
+        },
+        agenda:{
+            type:'array',
+            uniqueItems:true,
+            items:{
+                type:'string',
+                format:'date-time'
+            }
+        },
         createdAt:{
             type:'string',
             format:'date-time'
