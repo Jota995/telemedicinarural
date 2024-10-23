@@ -3,7 +3,7 @@ import { ExtractDocumentTypeFromTypedRxJsonSchema, RxJsonSchema, toTypedRxJsonSc
 export const DOCTOR_SCHEMA_LITERAL = {
     title:'Schema Doctor',
     version:0,
-    descriptioin:'',
+    description:'',
     type:'object',
     primaryKey:'id',
     properties:{

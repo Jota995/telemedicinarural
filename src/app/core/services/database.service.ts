@@ -6,6 +6,7 @@ import { RxTelemedicinaDb } from '../RxDB';
 import {RxDBJsonDumpPlugin} from 'rxdb/plugins/json-dump'
 import { PACIENTE_SCHEMA } from '../models/paciente.model';
 import { DOCTOR_SCHEMA } from '../models/doctor.model';
+import { CITA_SCHME } from '../models/cita.model';
 
 addRxPlugin(RxDBJsonDumpPlugin);
 let initState:null|Promise<any>;
@@ -26,6 +27,9 @@ async function createDatabase():Promise<any>{
         },
         doctor:{
             schema: DOCTOR_SCHEMA
+        },
+        cita:{
+            schema:CITA_SCHME
         }
     })
 

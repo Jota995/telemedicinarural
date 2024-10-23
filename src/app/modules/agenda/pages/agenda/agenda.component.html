@@ -2,27 +2,49 @@
     <h1>Citas Medicas</h1>
     <section class="flex flex-column gap-2">
         <h3>Consultar citas</h3>
-        <div class="flex gap-2">
-            @for (item of tipo_citas; track $index) {
-                <p-card [style]="{ width: '160px', height:'80' }">
-                   <div class="flex flex-column align-items-center gap-2">
-                    <p-avatar 
-                    label="P" 
-                    styleClass="mr-2" 
-                    size="large" 
-                    shape="circle" />
-                    <small>
-                        {{item}}
-                    </small>
-                   </div>
-                </p-card>
-            }
+        <div class="flex gap-2 overflow-scroll">
+            <a  routerLink="/app/agenda/periodo/dia" class="p-card p-3" [style]="{ width: '160px'}">
+                <div class="flex flex-column align-items-center gap-2">
+                 <p-avatar 
+                 label="P" 
+                 styleClass="mr-2" 
+                 size="large" 
+                 shape="circle" />
+                 <small>
+                     Citas del dia
+                 </small>
+                </div>
+             </a>
+             <a  routerLink="/app/agenda/periodo/semana" class="p-card p-3" [style]="{ width: '160px'}">
+                <div class="flex flex-column align-items-center gap-2">
+                 <p-avatar 
+                 label="P" 
+                 styleClass="mr-2" 
+                 size="large" 
+                 shape="circle" />
+                 <small>
+                     Citas de la semana
+                 </small>
+                </div>
+             </a>
+             <a  routerLink="/app/agenda/periodo/mes" class="p-card p-3" [style]="{ width: '160px'}">
+                <div class="flex flex-column align-items-center gap-2">
+                 <p-avatar 
+                 label="P" 
+                 styleClass="mr-2" 
+                 size="large" 
+                 shape="circle" />
+                 <small>
+                     Citas del mes
+                 </small>
+                </div>
+             </a>
         </div>
     </section>
     <section>
         <h3>Proximas Citas</h3>
         <div class="flex gap-2">
-            @for (item of proximas_citas; track $index) {
+            @for (cita of proximasCitas$ | async ; track $index) {
                 <p-card [style]="{ width: '160px', height:'20' }">
                     <ng-template pTemplate="content" >
                         <div class="flex flex-column align-items-center gap-2">
@@ -30,7 +52,7 @@
                                 label="P" 
                                 styleClass="mr-2" 
                                 shape="circle" />
-                                <small>{{item}}</small>
+                                <small>{{cita?.fecha}}</small>
                         </div>
                     </ng-template>
                 </p-card>
@@ -43,12 +65,12 @@
             <ng-template pTemplate="content" >
                 <div class="flex flex-column">
                     <span>Citas Programadas</span>
-                    <span>45</span>
+                    <span>{{citasProgramadasEnElMes$ | async}}</span>
                 </div>
             </ng-template>
         </p-card>
     </section>
     <section>
-        <p-button label="Agendar cita medica" [raised]="true" severity="contrast" styleClass="w-full mt-4" />
+        <a routerLink="/app/agenda/agendar-cita" class="p-button font-bold w-full mt-4 p-button-raised p-button-contrast">Agendar cita medica</a>
     </section>
 </main>

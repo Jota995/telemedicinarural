@@ -1,0 +1,15 @@
+<main class="flex flex-column p-3">
+    <h1>Citas {{periodo}}</h1>
+    <section class="flex flex-column gap-3">
+        @for (cita of citas$ | async; track $index) {
+            <div class="p-card flex flex-column gap-2 p-3">
+                <span><b>Doctor:</b> {{cita?.doctor?.nombre}}</span>
+                <span><b>Especialidad:</b> {{cita?.especialidad}}</span>
+                <span><b>Fecha:</b> {{ cita?.fecha | date: 'dd/MM/yyyy' }} - {{ cita?.fecha | date: 'shortTime' }}</span>
+            </div>
+        }
+        @empty {
+            <h4>No hay citas registradas.</h4>
+        }
+    </section>
+</main>

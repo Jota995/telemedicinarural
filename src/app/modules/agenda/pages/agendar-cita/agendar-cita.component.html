@@ -1,34 +1,56 @@
-<main class="p-3">
+<form [formGroup]="form" class="p-3" (ngSubmit)="onSubmit()">
     <h1>Agendar cita medica</h1>
     <section>
         <h4>Especialidad medica</h4>
-        <p-dropdown
-            placeholder="Seleccione una especialidad medica" styleClass="w-full"/>
+        <p-dropdown 
+            formControlName="especialidad" 
+            [options]="EspecialidadesMedicas" 
+            placeholder="Seleccione una especialidad medica" 
+            styleClass="w-full"/>
     </section>
     <section>
         <h4>Doctor</h4>
-        <p-dropdown
-            placeholder="Seleccione a un medico disponible" styleClass="w-full" />
+        <p-dropdown 
+            formControlName="idDoctor" 
+            placeholder="Seleccione a un medico disponible"
+            [options]="doctores$ | async"
+            [checkmark]="true"
+            optionLabel="nombre"
+            optionValue="id"
+            styleClass="w-full" />
     </section>
     <section>
         <h4>Fecha</h4>
-        <p-dropdown
-            placeholder="Seleccione una fecha" styleClass="w-full" />
+        <p-calendar 
+            formControlName="fecha"
+            [minDate]="minDate"
+            dateFormat="dd/mm/yy"
+            placeholder="Seleccione un dia a agendar"
+            styleClass="w-full" />
     </section>
     <section>
         <h4>Hora</h4>
-        <p-dropdown
-            placeholder="Seleccione una hora" styleClass="w-full" />
+        <p-calendar 
+                formControlName="hora" 
+                [timeOnly]="true"
+                [stepHour]="1"
+                [stepMinute] = "60"
+                [minDate]="minHour"
+                [maxDate]="maxHour"
+                [defaultDate]="defaultDate"
+                placeholder="Seleccione una hora a agendar"
+                styleClass="w-full"/>
     </section>
     <section>
         <h4>Motivo</h4>
         <textarea
             class="w-full"
             rows="5"
+            formControlName="motivo"
             pInputTextarea>
         </textarea>
     </section>
     <section>
-        <p-button label="Agendar" [raised]="true" severity="contrast" styleClass="w-full mt-4" />
+        <p-button [disabled]="form.invalid" type="submit" label="Agendar" [raised]="true" severity="contrast" styleClass="w-full mt-4" />
     </section>
-</main>
+</form>
