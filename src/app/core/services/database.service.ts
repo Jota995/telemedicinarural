@@ -3,12 +3,15 @@ import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie'
 import { HISTORIALMEDICO_SCHEMA } from '../models/historialmedico.model';
 import { Injectable } from '@angular/core';
 import { RxTelemedicinaDb } from '../RxDB';
-import {RxDBJsonDumpPlugin} from 'rxdb/plugins/json-dump'
 import { PACIENTE_SCHEMA } from '../models/paciente.model';
 import { DOCTOR_SCHEMA } from '../models/doctor.model';
 import { CITA_SCHME } from '../models/cita.model';
+import {RxDBJsonDumpPlugin} from 'rxdb/plugins/json-dump'
+import { RxDBUpdatePlugin } from 'rxdb/plugins/update';
 
 addRxPlugin(RxDBJsonDumpPlugin);
+addRxPlugin(RxDBUpdatePlugin);
+
 let initState:null|Promise<any>;
 let DB_INSTANCE:any;
 
@@ -150,7 +153,7 @@ export async function initDatabase() {
     await initState;
 }
 
-function generarFechas(dia:string, intervaloHoras:number):Array<string> {
+function generarFechas(dia:string, intervaloHoras:number):Array<{}> {
     // Crear un array para almacenar las fechas generadas
     const fechas = [];
     
@@ -164,9 +167,14 @@ function generarFechas(dia:string, intervaloHoras:number):Array<string> {
       
       // Sumar el intervalo de horas para cada iteración
       nuevaFecha.setHours(nuevaFecha.getHours() + (i * intervaloHoras));
+
+      const agenda = {
+        fecha:nuevaFecha.toISOString(),
+        estado:'disponible'
+      }
       
       // Agregar la fecha al array
-      fechas.push(nuevaFecha.toISOString());
+      fechas.push(agenda);
     }
   
     return fechas;

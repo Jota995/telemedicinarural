@@ -29,7 +29,7 @@ export const CITA_SCHEMA_LITERAL = {
         },
         estado:{
             type:'string',
-            enum:["programada", "cancelada", "completada", "no_asistida"],
+            enum:["programada", "cancelada", "completada", "no_asistida","pendiente"],
 
         },
         motivo:{
@@ -49,8 +49,8 @@ export const CITA_SCHEMA_LITERAL = {
             format: "date-time",
           },
         updatedAt: {
-        type: "string",
-        format: "date-time"
+            type: "string",
+            format: "date-time"
         }
     },
     required:['id','idPaciente','idDoctor','especialidad','fecha'],

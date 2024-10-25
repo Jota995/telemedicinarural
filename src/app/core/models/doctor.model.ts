@@ -36,10 +36,18 @@ export const DOCTOR_SCHEMA_LITERAL = {
         },
         agenda:{
             type:'array',
-            uniqueItems:true,
             items:{
-                type:'string',
-                format:'date-time'
+                type:'object',
+                properties:{
+                    fecha:{
+                        type:'string',
+                        format:'date-time'
+                    },
+                    estado:{
+                        type:'string',
+                        enum:['disponible','agendada','cancelada','pendiente']
+                    }
+                }
             }
         },
         createdAt:{

@@ -1,15 +1,15 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, OnDestroy, OnInit } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { DropdownModule } from 'primeng/dropdown';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { RxDatabaseService } from '../../../../core/services/database.service';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Observable, tap } from 'rxjs';
+import { distinct} from 'rxjs';
 import { AsyncPipe } from '@angular/common';
 import { CalendarModule } from 'primeng/calendar';
-import { RxDoctorCollecion } from '../../../../core/RxDB';
-import { RxDocument } from 'rxdb';
-
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
+import { AlertService } from '../../../../core/services/alert.service';
 
 
 @Component({
@@ -18,10 +18,11 @@ import { RxDocument } from 'rxdb';
   imports: [ButtonModule,DropdownModule,InputTextareaModule,CalendarModule,ReactiveFormsModule,AsyncPipe],
   templateUrl: './agendar-cita.component.html',
   styleUrl: './agendar-cita.component.css',
-  providers:[RxDatabaseService,FormBuilder]
+  providers:[RxDatabaseService,FormBuilder,Router,AlertService]
 })
 export class AgendarCitaComponent implements OnInit {
-  
+  private alertService = inject(AlertService)
+  private router = inject(Router)
   private fb = inject(FormBuilder);
   private dbService = inject(RxDatabaseService)
 
@@ -32,72 +33,156 @@ export class AgendarCitaComponent implements OnInit {
     'cardiologia'
   ]
 
-  public doctores$!:Observable<any>
-  public citasProgramadasEnElMes!:Observable<any>
+  public doctores:Array<any> = []
+  public doctor:any = {}
 
   public minDate = new Date()
   public maxDate!:Date;
 
-  public minHour = new Date()
-  public maxHour = new Date()
   public defaultDate: Date = new Date();
 
   public agendaDoctor:Array<Date> = []
 
   public horasAgendar:Array<{}> = []
 
-  
+  private destroyRef = inject(DestroyRef)
+
 
   ngOnInit(): void {
-    this.form = this.fb.group({
-      especialidad:[null,[Validators.required]],
+    this.form = this.buildForm()
+
+    this.defaultDate.setMinutes(0);
+  }
+
+  buildForm():FormGroup{
+    const form = this.fb.group({
       idPaciente:['d17b8f2a-6f01-4f57-853f-d5dee34960e0',[Validators.required]],
+      especialidad:[null,[Validators.required]],
       idDoctor:[null,[Validators.required]],
       fecha:[null,[Validators.required]],
       hora:[null,[Validators.required]],
       motivo:[null,[Validators.required]]
     })
 
-    this.defaultDate.setMinutes(0);
+    form.controls.idDoctor.disable({emitEvent:false})
+    form.controls.fecha.disable({emitEvent:false})
+    form.controls.hora.disable({emitEvent:false})
+    form.controls.motivo.disable({emitEvent:false})
 
-    // Setear la hora mínima (9:00 AM)
-    this.minHour.setHours(9, 0, 0, 0); // 9 AM, 0 minutos, 0 segundos, 0 milisegundos
-
-    // Setear la hora máxima (7:00 PM)
-    this.maxHour.setHours(19, 0, 0, 0);
-
-    this.doctores$ = this.dbService
-      .db
-      .doctor
-      .find()
-      .$
+    form
+      .controls
+      .especialidad
+      .valueChanges
       .pipe(
-        tap((values:Array<any>) => {
-          const agenda = values[0].agenda.map((date:string) => new Date(date))
+        distinct(),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(async (especialidad) =>{
+        form.controls.idDoctor.disable({emitEvent:false})
+        form.controls.fecha.disable({emitEvent:false})
+        form.controls.hora.disable({emitEvent:false})
+        form.controls.motivo.disable({emitEvent:false})
+
+        this.doctores= await this.dbService.db.doctor.find({
+          selector: {
+            especialidades: {
+              $elemMatch: {
+                $eq: especialidad
+              }
+            }
+          }
+        }).exec();
+
+        if(!this.doctores) return
+
+        form.controls.idDoctor.enable({emitEvent:false})
+
+      })
+
+    
+    form
+      .controls
+      .idDoctor
+      .valueChanges
+      .pipe(
+        distinct(),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe((idDoctor) =>{
+        this.doctor = this.doctores.find(x => x.id == idDoctor)
+
+        if(!this.doctor) return
+
+        const agenda = this.doctor.agenda.filter((x:any) => x.estado === 'disponible').map((x:any) => new Date(x.fecha))
+        
+        if(agenda.length){
           this.maxDate = new Date(Math.max(...agenda.map((fecha:Date) => fecha.getTime())));
           this.agendaDoctor = this.generarFechasDeshabilitadas(agenda)
-          this.horasAgendar = agenda.map((fecha:Date) => {
-            const horas = fecha.getHours().toString().padStart(2, '0'); // Asegurarse de que tenga 2 dígitos
-            const minutos = fecha.getMinutes().toString().padStart(2, '0'); // Asegurarse de que tenga 2 dígitos
-          
-            return {
-              hora: `${horas}:${minutos} hrs`,  // Formato "HH:MM"
-              fecha: fecha                  // Fecha original
-            };
-          });
-        })
-      )
+        }else{
+          this.maxDate = new Date()
+          this.agendaDoctor.push(new Date())
+          form.controls.fecha.setErrors({sinAgenda:true})
 
-    this.citasProgramadasEnElMes = this.dbService
-      .db
-      .cita
-      .count()
-      .$
+          return
+        }
+        
+        form.controls.fecha.enable({emitEvent:false})
+        
+      })
+
+    form
+      .controls
+      .fecha
+      .valueChanges
+      .pipe(
+        distinct(),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(fecha =>{
+        const agenda = this.doctor
+          .agenda
+          .filter((x: any) => x.estado === 'disponible')
+          .filter((x: any) => {
+            // Convertir ambas fechas a formato 'YYYY-MM-DD' para comparar solo el día
+            const fechaReferenciaISO = new Date(fecha!).toISOString().split('T')[0]; // Fecha de entrada sin horas
+            const fechaAgendaISO = new Date(x.fecha).toISOString().split('T')[0]; // Fecha de la agenda sin horas
+            return fechaAgendaISO === fechaReferenciaISO; // Comparar solo las fechas, sin horas
+          })
+          .map((x: any) => new Date(x.fecha));
+
+        this.horasAgendar = agenda.map((fecha:Date) => {
+          const horas = fecha.getHours().toString().padStart(2, '0'); // Asegurarse de que tenga 2 dígitos
+          const minutos = fecha.getMinutes().toString().padStart(2, '0'); // Asegurarse de que tenga 2 dígitos
+        
+          return {
+            hora: `${horas}:${minutos} hrs`,  // Formato "HH:MM"
+            fecha: fecha                  // Fecha original
+          };
+        });
+
+        if(!this.horasAgendar) return
+
+        form.controls.hora.enable({emitEvent:false})
+      })
+
+    form
+      .controls
+      .hora
+      .valueChanges
+      .pipe(
+        distinct(),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(value =>{
+        form.controls.motivo.enable({emitEvent:false})
+      })
+
+
+    return form
   }
 
   async onSubmit(){
     try {
-      console.log("form",this.form.getRawValue())
 
       const values = this.form.getRawValue();
 
@@ -107,20 +192,56 @@ export class AgendarCitaComponent implements OnInit {
         idDoctor:values.idDoctor,
         especialidad: values.especialidad,
         fecha: this.combinarFechas(values.fecha,values.hora),
-        estado:'programada',
+        estado:'pendiente',
         motivo:values.motivo,
         createdAt:new Date().toISOString()
       }
 
       await this.dbService.db.cita.insert(cita)
 
-      this.form.disable()
+      const doctor:any = await this.dbService.db.doctor.findOne({
+        selector:{
+          id:cita.idDoctor
+        }
+      }).exec()
 
-      console.log("cita creada")
+      const agendaActualizada = doctor.agenda.map((old:any) => {
+        if (old.fecha === cita.fecha) {
+          return { ...old, estado: 'pendiente' }; // Actualiza el estado de la cita
+        }
+        return old; // No modificar otras citas
+      });
+
+      await doctor.update({
+        $set: {
+          agenda: agendaActualizada
+        }
+      });
+    
+
+      this.form.disable({emitEvent:false})
+
+      this.alertService.showSuccess('Cita','Cita ingresada, se le enviara un correo con la confirmacion.')
+
+      this.router.navigate(['/app/agenda/resumen'])
+
 
     } catch (error) {
-      
+      console.log("erro", error)
     }
+  }
+
+  obtenerFechasPorDia(fechaReferencia:Date, fechas:Array<Date>) {
+    // Convertir la fecha de referencia a formato YYYY-MM-DD para comparar
+    const fechaReferenciaISO = fechaReferencia.toISOString().split('T')[0];
+  
+    // Filtrar todas las fechas que coincidan con el mismo día
+    return fechas.filter(fecha => {
+      // Convertir cada fecha del array al formato YYYY-MM-DD
+      const fechaISO = fecha.toISOString().split('T')[0];
+      // Comparar solo la parte de la fecha (sin las horas)
+      return fechaISO === fechaReferenciaISO;
+    });
   }
 
   combinarFechas(fechaPrincipal:Date, fechaHora:Date):string {
@@ -166,4 +287,5 @@ export class AgendarCitaComponent implements OnInit {
   
     return fechasDeshabilitadas;
   }
+
 }

@@ -1,8 +1,5 @@
 <main class="flex flex-column p-3">
     <h1>Citas Medicas</h1>
-    <section class="mb-5">
-        <a routerLink="/app/agenda/agendar-cita" class="p-button font-bold w-full mt-4 p-button-raised p-button-contrast">Agendar cita medica</a>
-    </section>
     <section class="flex flex-column gap-2">
         <h3>Consultar citas</h3>
         <div class="flex gap-2 overflow-scroll">
@@ -69,12 +66,16 @@
         <h3>Resumen Mensual</h3>
         <p-card >
             <ng-template pTemplate="content" >
-                <div class="flex flex-column">
-                    <span>Citas Programadas</span>
-                    <span>{{citasProgramadasEnElMes$ | async}}</span>
+                <div class="flex flex-column text-center gap-3">
+                    <span class="font-bold text-xl">Citas Programadas</span>
+                    <span class="text-xl">{{citasProgramadasEnElMes$ | async}}</span>
                 </div>
             </ng-template>
         </p-card>
+    </section>
+
+    <section class="mt-5">
+        <p-button routerLink="/app/agenda/agendar-cita" label="Agendar cita medica" severity="contrast" styleClass="w-full" />        
     </section>
     
 </main>

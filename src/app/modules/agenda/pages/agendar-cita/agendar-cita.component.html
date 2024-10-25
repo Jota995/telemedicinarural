@@ -13,7 +13,7 @@
         <p-dropdown 
             formControlName="idDoctor" 
             placeholder="Seleccione a un medico disponible"
-            [options]="doctores$ | async"
+            [options]="doctores"
             [checkmark]="true"
             optionLabel="nombre"
             optionValue="id"
@@ -29,7 +29,12 @@
             touchUI="true"
             dateFormat="dd/mm/yy"
             placeholder="Seleccione un dia a agendar"
-            styleClass="w-full" />
+            styleClass="w-full"
+             />
+            
+        @if (form.get('fecha')?.hasError('sinAgenda')) {
+            <span class="text-red-500 font-bold">Doctor sin agenda disponible.</span>
+        }
     </section>
     <section>
         <h4>Hora</h4>
