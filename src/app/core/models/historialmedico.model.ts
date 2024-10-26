@@ -11,7 +11,7 @@ export const HISTORIALMEDICO_SCHEMA_LITERAL = {
     properties: {
       id: {
         type: "string",
-        primary: true, // Clave primaria única para cada registro de historial médico
+        maxLength: 100,
       },
       idPaciente: {
         type: "string", // Identificador del paciente al que pertenece este historial
@@ -69,8 +69,9 @@ export const HISTORIALMEDICO_SCHEMA_LITERAL = {
       },
       citas:{
         type: "array",
+        ref:"cita",
         items:{
-          type:"any"
+          type:"string"
         }
       },
       createdAt: {
@@ -82,8 +83,7 @@ export const HISTORIALMEDICO_SCHEMA_LITERAL = {
         format: "date-time", // Fecha de la última actualización del historial
       },
     },
-    required: ["id"], 
-    indexes: ["id","idPaciente"],
+    required: ["id"]
   } as const;
 
 const schemaTyped = toTypedRxJsonSchema(HISTORIALMEDICO_SCHEMA_LITERAL);

@@ -10,6 +10,10 @@ import { CalendarModule } from 'primeng/calendar';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { AlertService } from '../../../../core/services/alert.service';
+import { CitaType, RxCitaDocType } from '../../../../core/models/cita.model';
+import { DoctorParamsQuery, DoctorService } from '../../../../core/services/doctor.service';
+import { CitaService } from '../../../../core/services/cita.service';
+import { DoctorType } from '../../../../core/models/doctor.model';
 
 
 @Component({
@@ -18,13 +22,14 @@ import { AlertService } from '../../../../core/services/alert.service';
   imports: [ButtonModule,DropdownModule,InputTextareaModule,CalendarModule,ReactiveFormsModule,AsyncPipe],
   templateUrl: './agendar-cita.component.html',
   styleUrl: './agendar-cita.component.css',
-  providers:[RxDatabaseService,FormBuilder,Router,AlertService]
+  providers:[DoctorService,CitaService,FormBuilder,Router,AlertService]
 })
 export class AgendarCitaComponent implements OnInit {
   private alertService = inject(AlertService)
   private router = inject(Router)
   private fb = inject(FormBuilder);
-  private dbService = inject(RxDatabaseService)
+  private citaService = inject(CitaService)
+  private doctorService = inject(DoctorService)
 
   public form!:FormGroup
 
@@ -33,8 +38,8 @@ export class AgendarCitaComponent implements OnInit {
     'cardiologia'
   ]
 
-  public doctores:Array<any> = []
-  public doctor:any = {}
+  public doctores:Array<DoctorType>  | undefined = []
+  public doctor!:DoctorType | null
 
   public minDate = new Date()
   public maxDate!:Date;
@@ -83,15 +88,11 @@ export class AgendarCitaComponent implements OnInit {
         form.controls.hora.disable({emitEvent:false})
         form.controls.motivo.disable({emitEvent:false})
 
-        this.doctores= await this.dbService.db.doctor.find({
-          selector: {
-            especialidades: {
-              $elemMatch: {
-                $eq: especialidad
-              }
-            }
-          }
-        }).exec();
+        const doctorQuery:DoctorParamsQuery = {
+          especialidad
+        }
+
+        this.doctores = await this.doctorService.obtenerDoctores(doctorQuery)
 
         if(!this.doctores) return
 
@@ -108,10 +109,10 @@ export class AgendarCitaComponent implements OnInit {
         distinct(),
         takeUntilDestroyed(this.destroyRef)
       )
-      .subscribe((idDoctor) =>{
-        this.doctor = this.doctores.find(x => x.id == idDoctor)
+      .subscribe(async (idDoctor) =>{
+        this.doctor = await this.doctorService.obtenerDoctor(idDoctor || '')
 
-        if(!this.doctor) return
+        if(!this.doctor || !this.doctor.agenda) return
 
         const agenda = this.doctor.agenda.filter((x:any) => x.estado === 'disponible').map((x:any) => new Date(x.fecha))
         
@@ -139,6 +140,9 @@ export class AgendarCitaComponent implements OnInit {
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe(fecha =>{
+
+        if(!this.doctor?.agenda) return
+
         const agenda = this.doctor
           .agenda
           .filter((x: any) => x.estado === 'disponible')
@@ -186,7 +190,7 @@ export class AgendarCitaComponent implements OnInit {
 
       const values = this.form.getRawValue();
 
-      const cita = {
+      const cita:CitaType= {
         id: Date.now().toString(36) + Math.random().toString(36).substring(2),
         idPaciente: values.idPaciente,
         idDoctor:values.idDoctor,
@@ -194,29 +198,10 @@ export class AgendarCitaComponent implements OnInit {
         fecha: this.combinarFechas(values.fecha,values.hora),
         estado:'pendiente',
         motivo:values.motivo,
-        createdAt:new Date().toISOString()
+        createdAt:new Date().toISOString(),
       }
 
-      await this.dbService.db.cita.insert(cita)
-
-      const doctor:any = await this.dbService.db.doctor.findOne({
-        selector:{
-          id:cita.idDoctor
-        }
-      }).exec()
-
-      const agendaActualizada = doctor.agenda.map((old:any) => {
-        if (old.fecha === cita.fecha) {
-          return { ...old, estado: 'pendiente' }; // Actualiza el estado de la cita
-        }
-        return old; // No modificar otras citas
-      });
-
-      await doctor.update({
-        $set: {
-          agenda: agendaActualizada
-        }
-      });
+      await this.citaService.agendarCita(cita)
     
 
       this.form.disable({emitEvent:false})

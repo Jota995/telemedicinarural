@@ -178,7 +178,11 @@ function generarFechas(dia:string, intervaloHoras:number):Array<{}> {
   }
 
 
-@Injectable()
+@Injectable(
+    {
+        providedIn:'root'
+    }
+)
 export class RxDatabaseService{
     get db():RxTelemedicinaDb{
         return DB_INSTANCE

@@ -44,7 +44,7 @@
     <section>
         <h3>Proximas Citas</h3>
         <div class="flex gap-2 overflow-scroll">
-            @for (cita of proximasCitas$ | async ; track $index) {
+            @for (cita of proximasCitas ; track $index) {
                 <p-card [style]="{ width: '160px', height:'20' }">
                     <ng-template pTemplate="content" >
                         <div class="flex flex-column align-items-center gap-2">
@@ -68,7 +68,7 @@
             <ng-template pTemplate="content" >
                 <div class="flex flex-column text-center gap-3">
                     <span class="font-bold text-xl">Citas Programadas</span>
-                    <span class="text-xl">{{citasProgramadasEnElMes$ | async}}</span>
+                    <span class="text-xl">{{citasProgramadasEnElMes}}</span>
                 </div>
             </ng-template>
         </p-card>

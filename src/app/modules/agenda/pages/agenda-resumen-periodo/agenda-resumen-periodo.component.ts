@@ -1,10 +1,10 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { RxDatabaseService } from '../../../../core/services/database.service';
 import { ActivatedRoute } from '@angular/router';
-import { Observable, tap } from 'rxjs';
 import { DataViewModule } from 'primeng/dataview';
 import { AsyncPipe, DatePipe, NgClass, NgFor } from '@angular/common';
 import { AvatarModule } from 'primeng/avatar';
+import { CitaService } from '../../../../core/services/cita.service';
+import { CitaType } from '../../../../core/models/cita.model';
 
 @Component({
   selector: 'app-agenda-resumen-periodo',
@@ -12,21 +12,21 @@ import { AvatarModule } from 'primeng/avatar';
   imports: [DataViewModule,AsyncPipe, NgClass, NgFor, AvatarModule, DatePipe],
   templateUrl: './agenda-resumen-periodo.component.html',
   styleUrl: './agenda-resumen-periodo.component.css',
-  providers:[RxDatabaseService]
+  providers:[CitaService]
 })
 export class AgendaResumenPeriodoComponent implements OnInit {
   private activateRotue = inject(ActivatedRoute)
-  private dbService = inject(RxDatabaseService)
+  private citaService = inject(CitaService)
 
   public periodo!:string | null
 
-  public citas$!:Observable<any>
+  public citas:Array<CitaType> = []
 
   ngOnInit(): void {
     this.periodo = this.activateRotue.snapshot.paramMap.get('periodo')
 
-    var periodoInicio:Date|null = null
-    var periodoFin:Date|null = null
+    var periodoInicio:Date = new Date
+    var periodoFin:Date = new Date
     
     if(this.periodo){
       switch(this.periodo){
@@ -49,29 +49,16 @@ export class AgendaResumenPeriodoComponent implements OnInit {
           break;
       }
 
-      this.citas$ = this.dbService
-        .db
-        .cita
-        .find({
-          selector:{
-            fecha:{
-              $gte: periodoInicio?.toISOString(),
-              $lte: periodoFin?.toISOString() 
-            }
-          }
-        })
-        .$
-        .pipe(
-          tap(async (results) => {
-            for (const cita of results || []) {
-              cita.doctor = await this.dbService.db.doctor.findOne({
-                  selector: { id: cita.idDoctor }
-              }).exec();
-            }
-          })
-        )
+      this.obtenerCitas(periodoInicio,periodoFin)
     }
 
+  }
+
+  async obtenerCitas(fechaInicio:Date,fechaTermino:Date){
+    this.citas = await this.citaService.obtenerCitas({
+      fechaInicio:fechaInicio,
+      fechaTermino: fechaTermino
+    })
   }
 
   obtenerPeriodoHoy() {

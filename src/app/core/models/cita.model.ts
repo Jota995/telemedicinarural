@@ -11,7 +11,7 @@ export const CITA_SCHEMA_LITERAL = {
     properties:{
         id:{
             type:'string',
-            primary:true
+            maxLength: 100,
         },
         idPaciente:{
             type:'string',
@@ -26,7 +26,8 @@ export const CITA_SCHEMA_LITERAL = {
         },
         fecha:{
             type:'string',
-            format:'date-time'
+            format:'date-time',
+            maxLength: 100,
         },
         estado:{
             type:'string',
@@ -55,7 +56,7 @@ export const CITA_SCHEMA_LITERAL = {
         }
     },
     required:['id','idPaciente','idDoctor','especialidad','fecha'],
-    indexes: ["idPaciente", "idDoctor", "fecha"],
+    indexes: ['fecha']
 } as const;
 
 const schemaTyped = toTypedRxJsonSchema(CITA_SCHEMA_LITERAL)
@@ -65,7 +66,7 @@ export type RxCitaDocType = ExtractDocumentTypeFromTypedRxJsonSchema<typeof sche
 export const citaSchema:RxJsonSchema<RxCitaDocType> = CITA_SCHEMA_LITERAL
 
 export type CitaType = RxCitaDocType & {
-    doctor: DoctorType | null
-    paciente: PacienteType | null
+    doctor?: DoctorType | null
+    paciente?: PacienteType | null
 
 }

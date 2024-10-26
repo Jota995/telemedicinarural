@@ -9,7 +9,7 @@ export const PACIENTE_SCHEMA_LITERAL = {
     properties:{
         id:{
             type:'string',
-            primary: true
+            maxLength: 100,
         },
         nombre:{
             type:'string'
@@ -36,8 +36,7 @@ export const PACIENTE_SCHEMA_LITERAL = {
             format:'date-time'
         }
     },
-    required:['id','nombre'],
-    indexes:['id']
+    required:['id']
 } as const;
 
 const schemaTyped = toTypedRxJsonSchema(PACIENTE_SCHEMA_LITERAL);

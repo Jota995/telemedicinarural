@@ -4,7 +4,9 @@ import { User } from '../models/user.model';
 import { AuthService } from '../auth/services/auth.service';
 import { JwtHelperService } from '@auth0/angular-jwt';
 
-@Injectable()
+@Injectable({
+  providedIn:'root'
+})
 export class UserService {
   private user!:BehaviorSubject<User>;
   private authService = inject(AuthService);
