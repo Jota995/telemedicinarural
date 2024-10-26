@@ -7,6 +7,7 @@ import { DoctorType } from '../models/doctor.model';
 import { PacienteType } from '../models/paciente.model';
 
 export type CitasQueryParams = {
+  idCita?:string
   fechaInicio: Date
   fechaTermino?: Date
   idPaciente?:string
@@ -27,7 +28,45 @@ export class CitaService {
   
   constructor() { }
 
-  async obtenerCitas({fechaInicio, fechaTermino, idPaciente,idDoctor,estado}:CitasQueryParams):Promise<Array<CitaType>>{
+
+  async obtenerCita(idCita:string):Promise<CitaType | null>{
+    var cita:CitaType|null = null;
+
+    const rxCita : RxCitaDocType | null = await this.dbService.db.cita.findOne({
+      selector:{
+        id:idCita
+      },
+      sort:[{
+        fecha:'asc'
+      }]
+    })
+    .exec()
+
+    if(!rxCita) return cita
+
+    const doctor:DoctorType | null = await this.doctorService.obtenerDoctor(rxCita.idDoctor)
+    const paciente:PacienteType | null = await this.pacienteService.obtenerPaciente(rxCita.idPaciente)
+
+    cita = {
+      id:rxCita.id,
+      idPaciente:rxCita.idPaciente,
+      idDoctor:rxCita.idDoctor,
+      especialidad:rxCita.especialidad,
+      fecha:rxCita.fecha,
+      estado:rxCita.estado,
+      motivo:rxCita.motivo,
+      inicio:rxCita.inicio,
+      fin:rxCita.fin,
+      createdAt:rxCita.createdAt,
+      updatedAt:rxCita.updatedAt,
+      doctor,
+      paciente
+    }
+
+    return cita;
+  }
+
+  async obtenerCitas({fechaInicio, fechaTermino, idPaciente,idDoctor,estado,idCita}:CitasQueryParams):Promise<Array<CitaType>>{
     const citas:Array<CitaType> = []
 
     const rxCitas : Array<RxCitaDocType> | null = await this.dbService.db.cita.find({
@@ -38,7 +77,8 @@ export class CitaService {
         },
         ...(estado && { estado }),
         ...(idPaciente && { idPaciente }),
-        ...(idDoctor && { idDoctor })
+        ...(idDoctor && { idDoctor }),
+        ...(idCita && { idCita })
       },
       sort:[{
         fecha:'asc'
@@ -56,7 +96,7 @@ export class CitaService {
       }
 
       const doctor:DoctorType | null = await this.doctorService.obtenerDoctor(rxCita.idDoctor)
-      const paciente:PacienteType | null = await this.pacienteService.obtenerPaciente(pacienteQuery)
+      const paciente:PacienteType | null = await this.pacienteService.obtenerPaciente(rxCita.idPaciente)
 
       const cita:CitaType = {
         id:rxCita.id,

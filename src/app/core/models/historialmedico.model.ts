@@ -17,12 +17,12 @@ export const HISTORIALMEDICO_SCHEMA_LITERAL = {
         type: "string", // Identificador del paciente al que pertenece este historial
         ref: "paciente", // Referencia a la colección de pacientes (si la hay)
       },
-      citasMedicas: {
-        type: "array", // Registro de consultas médicas recientes
-        items: {
-          type: "string",
-          ref:'cita'
-        },
+      idCitasMedicas: {
+        type: "array",
+        ref:"cita",
+        items:{
+          type:"string"
+        }
       },
       historialPrescripciones: {
         type: "array", // Lista de condiciones médicas preexistentes
@@ -65,13 +65,6 @@ export const HISTORIALMEDICO_SCHEMA_LITERAL = {
             name: { type: "string" }, // Nombre del contacto de emergencia
             estadistica: { type: "string" }, // Relación con el paciente
           }
-        }
-      },
-      citas:{
-        type: "array",
-        ref:"cita",
-        items:{
-          type:"string"
         }
       },
       createdAt: {

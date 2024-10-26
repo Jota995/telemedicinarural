@@ -14,7 +14,7 @@ export class PacienteService {
 
   constructor() { }
 
-  async obtenerPaciente({idPaciente}:PacienteParamsQuery):Promise<PacienteType | null>{
+  async obtenerPaciente(idPaciente:string):Promise<PacienteType | null>{
     const rxPaciente:RxPacienteDocType | null = await this.dbService
       .db
       .paciente
@@ -29,7 +29,14 @@ export class PacienteService {
     if(!rxPaciente) return null;
 
     const paciente:PacienteType = {
-      ...rxPaciente
+      id:rxPaciente.id,
+      nombre: rxPaciente.nombre,
+      fechaNacimiento: rxPaciente.fechaNacimiento,
+      genero: rxPaciente.genero,
+      estadoCivil: rxPaciente.estadoCivil,
+      nacionalidad: rxPaciente.nacionalidad,
+      createdAt: rxPaciente.createdAt,
+      updatedAt: rxPaciente.updatedAt
     }
 
     return paciente;

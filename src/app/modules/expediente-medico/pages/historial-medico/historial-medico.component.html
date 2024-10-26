@@ -1,6 +1,6 @@
 <main class="flex flex-column p-3">
     <h1>Historial Medico</h1>
-    @if (historialMedico$ | async ; as historial) {
+    @if (historialMedico ; as historial) {
         <section>
             <h3>Datos del paciente</h3>
             <div class="flex flex-column">
@@ -33,24 +33,24 @@
                 }
             </div>
         </section>
-        <section>
+        <!-- <section>
             <h3>Notas del doctor</h3>
             <div class="flex gap-2 overflow-y-auto">
-                @for (item of notasDelDoctor; track $index) {
+                @for (item of historial.notasDoctor; track $index) {
                     <p-card styleClass="w-16rem">
                         <div class="flex align-items-center mb-3">
                             <p-avatar 
                             label="P" 
                             styleClass="mr-2" 
                             shape="circle" />
-                            <small>{{item.doctor}}</small>
+                            <small>{{item?.doctor}}</small>
                         </div>
                         <span>{{item.nota}}</span>
                     </p-card>
                 }
             </div>
             
-        </section>
+        </section> -->
         <!-- <section>
             <h3>Alergias</h3>
             <p-dataView #dv [value]="alergias">
@@ -99,7 +99,7 @@
                 </div>
             </div>
         </section>
-        <section>
+        <!-- <section>
             <h3>Consultas Medicas</h3>
             <p-dataView #dv [value]="consultasMedicas">
                 <ng-template pTemplate="list" let-consultasMedicas>
@@ -129,7 +129,7 @@
                     </div>
                 </ng-template>
             </p-dataView>
-        </section>
+        </section> -->
         <section>
             <h3>Estadisticas de salud</h3>
             <div class="flex gap-3">
