@@ -1,16 +1,21 @@
 import { RxCollection, RxDatabase, RxDocument } from "rxdb";
 
-export type RxHistorialMedicoDocument = RxDocument<RxHistorialMedicoDocumentType,{}>;
-export type RxHistorialMedicoCollection = RxCollection<RxHistorialMedicoDocumentType,{},{}>;
+import {RxHistorialMedicoDocType} from './models/historialmedico.model'
+import {RxPacienteDocType} from './models/paciente.model'
+import {RxDoctorType} from './models/doctor.model'
+import {RxCitaDocType} from './models/cita.model'
 
-export type RxPacienteDocument = RxDocument<RxPacienteDocumentType,{}>;
-export type RxPacienteCollecion = RxCollection<RxPacienteDocumentType,{},{}>;
+export type RxHistorialMedicoDocument = RxDocument<RxHistorialMedicoDocType,{}>;
+export type RxHistorialMedicoCollection = RxCollection<RxHistorialMedicoDocType,{},{}>;
+
+export type RxPacienteDocument = RxDocument<RxPacienteDocType,{}>;
+export type RxPacienteCollecion = RxCollection<RxPacienteDocType,{},{}>;
 
 export type RxDoctorDocument = RxDocument<RxDoctorDocumentType,{}>;
 export type RxDoctorCollecion = RxCollection<RxDoctorDocumentType,{},{}>;
 
-export type RxCitaDocument = RxDocument<RxCitaDocumentType,{}>;
-export type RxCitaCollection = RxCollection<RxCitaDocumentType,{},{}>;
+export type RxCitaDocument = RxDocument<RxCitaDocType,{}>;
+export type RxCitaCollection = RxCollection<RxCitaDocType,{},{}>;
 
 export type RxHistorialMedicoCollections = {
     historialmedico: RxHistorialMedicoCollection,

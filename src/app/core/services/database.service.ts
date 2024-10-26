@@ -1,13 +1,15 @@
 import { addRxPlugin, createRxDatabase } from 'rxdb';
 import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie'
-import { HISTORIALMEDICO_SCHEMA } from '../models/historialmedico.model';
+import { historialMedicoSchema, RxHistorialMedicoDocType } from '../models/historialmedico.model';
 import { Injectable } from '@angular/core';
 import { RxTelemedicinaDb } from '../RxDB';
-import { PACIENTE_SCHEMA } from '../models/paciente.model';
-import { DOCTOR_SCHEMA } from '../models/doctor.model';
-import { CITA_SCHME } from '../models/cita.model';
+import { pacienteSchema, RxPacienteDocType } from '../models/paciente.model';
+import { doctorSchema, RxDoctorDocType } from '../models/doctor.model';
+import { citaSchema } from '../models/cita.model';
 import {RxDBJsonDumpPlugin} from 'rxdb/plugins/json-dump'
 import { RxDBUpdatePlugin } from 'rxdb/plugins/update';
+import { isDevMode } from '@angular/core';
+
 
 addRxPlugin(RxDBJsonDumpPlugin);
 addRxPlugin(RxDBUpdatePlugin);
@@ -23,16 +25,16 @@ async function createDatabase():Promise<any>{
 
     await database.addCollections({
         historialmedico:{
-            schema: HISTORIALMEDICO_SCHEMA
+            schema: historialMedicoSchema
         },
         paciente:{
-            schema: PACIENTE_SCHEMA
+            schema: pacienteSchema
         },
         doctor:{
-            schema: DOCTOR_SCHEMA
+            schema: doctorSchema
         },
         cita:{
-            schema:CITA_SCHME
+            schema:citaSchema
         }
     })
 
@@ -66,7 +68,7 @@ async function seedDb(database:RxTelemedicinaDb){
         }).exec();
     
         if(!existePaciente){
-            const newPaciente = {
+            const newPaciente:RxPacienteDocType = {
                 id:idPaciente,
                 nombre:'Hector Morales',
                 fechaNacimiento:new Date().toISOString(),
@@ -81,14 +83,14 @@ async function seedDb(database:RxTelemedicinaDb){
         }
 
         if(!existeDoctor){
-            const newDoctor = {
+            const newDoctor:RxDoctorDocType = {
                 id:idDoctor,
                 nombre:'Pedro Fernandez',
                 especialidades:[
                     'neurologia',
                     'cardiologia'
                 ],
-                agenda: generarFechas('2024-10-25T08:00:00',1),
+                agenda: generarFechas('2024-10-27T08:00:00',1),
                 createdAt: new Date().toISOString()
             }
 
@@ -97,7 +99,7 @@ async function seedDb(database:RxTelemedicinaDb){
         }
 
         if(!existeHistorialMedicoPaciente){
-            const newHistorialMedico = {
+            const newHistorialMedico:RxHistorialMedicoDocType = {
                 id: idHistorialMedico,
                 idPaciente: idPaciente,
                 historialPrescripciones:[
@@ -118,16 +120,6 @@ async function seedDb(database:RxTelemedicinaDb){
                         sugerencia:'Mantener una dieta balanceada rica en frutas y vegetales'
                     }
                 ],
-                consultasMedicas:[
-                    {
-                        idDoctor:idDoctor,
-                        fecha: new Date().toISOString()
-                    },
-                    {
-                        idDoctor:idDoctor,
-                        fecha: new Date().toISOString()
-                    }
-                ],
                 estadisticaSalud:[
                     {
                         name:'Presion arterial',
@@ -146,6 +138,11 @@ async function seedDb(database:RxTelemedicinaDb){
 }
 
 export async function initDatabase() {
+    if (isDevMode()){
+        await import('rxdb/plugins/dev-mode').then(
+            module => addRxPlugin(module.RxDBDevModePlugin)
+        );
+    }
     if(!initState){
         initState = createDatabase().then((db) => (DB_INSTANCE = db))
     }

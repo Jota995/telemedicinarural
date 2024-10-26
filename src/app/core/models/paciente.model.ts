@@ -38,10 +38,14 @@ export const PACIENTE_SCHEMA_LITERAL = {
     },
     required:['id','nombre'],
     indexes:['id']
-}
+} as const;
 
 const schemaTyped = toTypedRxJsonSchema(PACIENTE_SCHEMA_LITERAL);
 
-export type RxPacienteType = ExtractDocumentTypeFromTypedRxJsonSchema<typeof schemaTyped>;
+export type RxPacienteDocType = ExtractDocumentTypeFromTypedRxJsonSchema<typeof schemaTyped>;
 
-export const PACIENTE_SCHEMA:RxJsonSchema<RxPacienteType> = PACIENTE_SCHEMA_LITERAL
+export const pacienteSchema:RxJsonSchema<RxPacienteDocType> = PACIENTE_SCHEMA_LITERAL
+
+export type PacienteType = RxPacienteDocType & {
+    
+}

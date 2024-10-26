@@ -1,5 +1,6 @@
 import { ExtractDocumentTypeFromTypedRxJsonSchema, RxJsonSchema, toTypedRxJsonSchema } from "rxdb"
-
+import { DoctorType } from "./doctor.model";
+import { PacienteType } from "./paciente.model";
 
 export const CITA_SCHEMA_LITERAL = {
     title:'Schema Cita Medica',
@@ -13,7 +14,7 @@ export const CITA_SCHEMA_LITERAL = {
             primary:true
         },
         idPaciente:{
-            type:'sring',
+            type:'string',
             ref:'paciente'
         },
         idDoctor:{
@@ -54,11 +55,17 @@ export const CITA_SCHEMA_LITERAL = {
         }
     },
     required:['id','idPaciente','idDoctor','especialidad','fecha'],
-    indexes: ["idPaciente", "idDoctor", "fecha"]
-}
+    indexes: ["idPaciente", "idDoctor", "fecha"],
+} as const;
 
 const schemaTyped = toTypedRxJsonSchema(CITA_SCHEMA_LITERAL)
 
-export type RxCitaType = ExtractDocumentTypeFromTypedRxJsonSchema<typeof schemaTyped>
+export type RxCitaDocType = ExtractDocumentTypeFromTypedRxJsonSchema<typeof schemaTyped>
 
-export const CITA_SCHME:RxJsonSchema<RxCitaType> = CITA_SCHEMA_LITERAL
+export const citaSchema:RxJsonSchema<RxCitaDocType> = CITA_SCHEMA_LITERAL
+
+export type CitaType = RxCitaDocType & {
+    doctor: DoctorType | null
+    paciente: PacienteType | null
+
+}

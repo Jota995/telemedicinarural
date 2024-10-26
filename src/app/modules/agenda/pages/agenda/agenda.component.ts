@@ -3,9 +3,12 @@ import { AvatarModule } from 'primeng/avatar';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
+import { map, Observable, tap,  switchMap, from } from 'rxjs';
 import { RxDatabaseService } from '../../../../core/services/database.service';
 import { AsyncPipe, DatePipe } from '@angular/common';
+import { CitaType, RxCitaDocType } from '../../../../core/models/cita.model'
+import { DoctorType } from '../../../../core/models/doctor.model';
+import { PacienteType } from '../../../../core/models/paciente.model';
 
 @Component({
   selector: 'app-agenda',
@@ -18,9 +21,8 @@ import { AsyncPipe, DatePipe } from '@angular/common';
 export class AgendaComponent implements OnInit{
   private dbService = inject(RxDatabaseService)
 
-  public tipo_citas:Array<string> = ['citas del dia','citas de la semana', 'citas del mes']
-  public citasProgramadasEnElMes$!: Observable<any>;
-  public proximasCitas$!:Observable<any>;
+  public citasProgramadasEnElMes$!: Observable<number>;
+  public proximasCitas$!:Observable<Array<CitaType> | null> ;
 
   ngOnInit(): void {
     const fechaActual = new Date();
@@ -62,6 +64,47 @@ export class AgendaComponent implements OnInit{
         }
       )
       .$
+      .pipe(
+        switchMap((RxCitas) => 
+          from((async () => {
+            const citas: Array<CitaType> = [];
+            let doctor: DoctorType | null = null;
+            let paciente: PacienteType | null = null;
+    
+            for (const rxCita of RxCitas || []) {
+              const rxDoctor = await this.dbService.db.doctor.findOne({
+                selector: {
+                  id: rxCita.idDoctor
+                }
+              }).exec();
+    
+              if (rxDoctor) {
+                doctor = { ...rxDoctor };
+              }
+    
+              const rxPaciente = await this.dbService.db.paciente.findOne({
+                selector: {
+                  id: rxCita.idPaciente
+                }
+              }).exec();
+    
+              if (rxPaciente) {
+                paciente = { ...rxPaciente };
+              }
+    
+              const cita: CitaType = {
+                ...rxCita,
+                doctor,
+                paciente
+              };
+    
+              citas.push(cita);
+            }
+    
+            return citas;
+          })())
+        )
+      );
   }
 
 }

@@ -1,4 +1,6 @@
 import { ExtractDocumentTypeFromTypedRxJsonSchema, RxJsonSchema, toTypedRxJsonSchema } from "rxdb";
+import { PacienteType, RxPacienteDocType } from "./paciente.model";
+import { CitaType, RxCitaDocType } from "./cita.model";
 
 export const HISTORIALMEDICO_SCHEMA_LITERAL = {
     title: "Medical History Schema",
@@ -14,6 +16,13 @@ export const HISTORIALMEDICO_SCHEMA_LITERAL = {
       idPaciente: {
         type: "string", // Identificador del paciente al que pertenece este historial
         ref: "paciente", // Referencia a la colección de pacientes (si la hay)
+      },
+      citasMedicas: {
+        type: "array", // Registro de consultas médicas recientes
+        items: {
+          type: "string",
+          ref:'cita'
+        },
       },
       historialPrescripciones: {
         type: "array", // Lista de condiciones médicas preexistentes
@@ -48,25 +57,21 @@ export const HISTORIALMEDICO_SCHEMA_LITERAL = {
           }
         },
       },
-      consultasMedicas: {
-        type: "array", // Registro de consultas médicas recientes
-        items: {
+      estadisticaSalud: {
+        type: "array",
+        items:{
           type: "object",
           properties: {
-            idDoctor:{
-              ref:'doctor',
-              type:'string'
-            },
-            fecha: { type: "string",format: "date-time" },
-          },
-        },
+            name: { type: "string" }, // Nombre del contacto de emergencia
+            estadistica: { type: "string" }, // Relación con el paciente
+          }
+        }
       },
-      estadisticaSalud: {
-        type: "object", // Información del contacto de emergencia
-        properties: {
-          name: { type: "string" }, // Nombre del contacto de emergencia
-          estadistica: { type: "string" }, // Relación con el paciente
-        },
+      citas:{
+        type: "array",
+        items:{
+          type:"any"
+        }
       },
       createdAt: {
         type: "string",
@@ -78,11 +83,16 @@ export const HISTORIALMEDICO_SCHEMA_LITERAL = {
       },
     },
     required: ["id"], 
-    indexes: ["idPaciente", "id"],
-  };
+    indexes: ["id","idPaciente"],
+  } as const;
 
-  const schemaTyped = toTypedRxJsonSchema(HISTORIALMEDICO_SCHEMA_LITERAL);
+const schemaTyped = toTypedRxJsonSchema(HISTORIALMEDICO_SCHEMA_LITERAL);
 
-  export type RxHistorialMedicoType = ExtractDocumentTypeFromTypedRxJsonSchema<typeof schemaTyped>;
+export type RxHistorialMedicoDocType = ExtractDocumentTypeFromTypedRxJsonSchema<typeof schemaTyped>;
 
-  export const HISTORIALMEDICO_SCHEMA:RxJsonSchema<RxHistorialMedicoType> = HISTORIALMEDICO_SCHEMA_LITERAL
+export const historialMedicoSchema:RxJsonSchema<RxHistorialMedicoDocType> = HISTORIALMEDICO_SCHEMA_LITERAL
+
+export type HistorialMedicoType = RxHistorialMedicoDocType & {
+  paciente: PacienteType | null
+  citas: Array<CitaType> | null
+}
