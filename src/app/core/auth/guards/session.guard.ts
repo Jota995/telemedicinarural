@@ -6,8 +6,10 @@ export const sessionGuard: CanActivateFn = (route, state) => {
   const router = inject(Router)
   const authService = inject(AuthService)
 
-  if(authService.isAuthenticated())
+  if(authService.isAuthenticated()){
+    router.navigate(['/app/agenda/resumen'])
     return false
-
+  }
+  
   return true;
 };

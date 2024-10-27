@@ -5,8 +5,6 @@ import { AuthService } from './services/auth.service';
 export const routes: Routes = [
     {
         path:'',
-        canActivate:[sessionGuard],
-        providers:[AuthService],
         children:[
             {
                 path:'login',

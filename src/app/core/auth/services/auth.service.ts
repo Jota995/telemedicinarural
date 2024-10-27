@@ -18,7 +18,7 @@ export class AuthService {
     const body = {email,password}
     const {token} = await firstValueFrom(this.http.post<any>(`${this.baseUrl}/api/Account/login`,body))
     localStorage.setItem(this.tokenKey, token);
-    this.router.navigate(['/app/home'])
+    this.router.navigate(['/app/agenda/resumen'])
   }
 
   isAuthenticated(): boolean {

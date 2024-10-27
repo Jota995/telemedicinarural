@@ -1,11 +1,13 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/auth/guards/auth.guard';
 import { AuthService } from './core/auth/services/auth.service';
+import { AppLayoutComponent } from './core/layouts/app-layout/app-layout.component';
+import { sessionGuard } from './core/auth/guards/session.guard';
 
 export const routes: Routes = [
     {
         path:'app',
-        loadComponent: () => import('./core/layouts/app-layout/app-layout.component').then(m => m.AppLayoutComponent),
+        component: AppLayoutComponent,
         canActivate:[authGuard],
         providers:[AuthService],
         children:[
@@ -25,6 +27,8 @@ export const routes: Routes = [
     },
     {
         path:'auth',
+        canActivate:[sessionGuard],
+        providers:[AuthService],
         loadChildren: () => import('./core/auth/auth.routes').then(m => m.routes)
     },
     {
