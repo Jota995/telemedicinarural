@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { RxDatabaseService } from './database.service';
 import { PacienteService } from './paciente.service';
-import { CitaService } from './cita.service';
+import { CitaService, CitasQueryParams } from './cita.service';
 import { HistorialMedicoType, RxHistorialMedicoDocType } from '../models/historialmedico.model';
 import { CitaType } from '../models/cita.model';
 import { PacienteType } from '../models/paciente.model';
@@ -27,7 +27,7 @@ export class HistorialMedicoService {
   {
     var historialMedico:HistorialMedicoType | null = null
     var citas:Array<CitaType> = []
-    var paciente:PacienteType | null = null
+    var paciente:PacienteType | undefined = undefined
 
     if(!idPaciente && !idHistorial) return historialMedico
 
@@ -43,11 +43,13 @@ export class HistorialMedicoService {
       if(!rxHistorialMedico) return historialMedico
   
       if(rxHistorialMedico.idCitasMedicas){
-        for(const rxIdCita of rxHistorialMedico.idCitasMedicas){
-          const cita = await this.citaService.obtenerCita(rxIdCita);
-          if(!cita) continue
-          citas.push(cita)
+        const citasQuery:CitasQueryParams ={
+          idCitas: rxHistorialMedico.idCitasMedicas,
+          ordenamiento:'asc',
+          limite: 3
         }
+
+        citas = await this.citaService.obtenerCitas(citasQuery)
       }
   
       if(rxHistorialMedico.idPaciente){

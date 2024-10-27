@@ -86,6 +86,6 @@ export type RxHistorialMedicoDocType = ExtractDocumentTypeFromTypedRxJsonSchema<
 export const historialMedicoSchema:RxJsonSchema<RxHistorialMedicoDocType> = HISTORIALMEDICO_SCHEMA_LITERAL
 
 export type HistorialMedicoType = RxHistorialMedicoDocType & {
-  paciente: PacienteType | null
-  citas: Array<CitaType> | null
+  paciente: PacienteType | undefined
+  citas: Array<CitaType> | undefined
 }

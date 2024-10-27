@@ -66,7 +66,7 @@ export type RxCitaDocType = ExtractDocumentTypeFromTypedRxJsonSchema<typeof sche
 export const citaSchema:RxJsonSchema<RxCitaDocType> = CITA_SCHEMA_LITERAL
 
 export type CitaType = RxCitaDocType & {
-    doctor?: DoctorType | null
-    paciente?: PacienteType | null
+    doctor?: DoctorType | undefined
+    paciente?: PacienteType | undefined
 
 }

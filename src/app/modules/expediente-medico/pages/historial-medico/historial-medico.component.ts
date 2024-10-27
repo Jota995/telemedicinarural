@@ -33,8 +33,6 @@ export class HistorialMedicoComponent implements OnInit {
     const historialQuery:HistorialMedicoQueryParams = {
       idHistorial: this.idHistorial || ''
     }
-
-    console.log("historial query",historialQuery)
     
     this.historialMedicoService
       .obtenerHistorialMedico(historialQuery)

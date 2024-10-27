@@ -7,13 +7,14 @@ import { DoctorType } from '../models/doctor.model';
 import { PacienteType } from '../models/paciente.model';
 
 export type CitasQueryParams = {
-  idCita?:string
-  fechaInicio: Date
+  idCitas?:Array<string>
+  fechaInicio?: Date
   fechaTermino?: Date
   idPaciente?:string
   idDoctor?:string
   estado?:"programada"|"cancelada"|"completada"|"no_asistida"|"pendiente"
-
+  limite?:number,
+  ordenamiento?:'asc'|'desc'
 }
 
 @Injectable(
@@ -44,8 +45,8 @@ export class CitaService {
 
     if(!rxCita) return cita
 
-    const doctor:DoctorType | null = await this.doctorService.obtenerDoctor(rxCita.idDoctor)
-    const paciente:PacienteType | null = await this.pacienteService.obtenerPaciente(rxCita.idPaciente)
+    const doctor:DoctorType | undefined = await this.doctorService.obtenerDoctor(rxCita.idDoctor)
+    const paciente:PacienteType | undefined = await this.pacienteService.obtenerPaciente(rxCita.idPaciente)
 
     cita = {
       id:rxCita.id,
@@ -60,29 +61,35 @@ export class CitaService {
       createdAt:rxCita.createdAt,
       updatedAt:rxCita.updatedAt,
       doctor,
-      paciente
+      paciente,
     }
 
     return cita;
   }
 
-  async obtenerCitas({fechaInicio, fechaTermino, idPaciente,idDoctor,estado,idCita}:CitasQueryParams):Promise<Array<CitaType>>{
+  async obtenerCitas({fechaInicio, fechaTermino, idPaciente,idDoctor,estado,idCitas,limite,ordenamiento= 'asc'}:CitasQueryParams):Promise<Array<CitaType>>{
     const citas:Array<CitaType> = []
 
+    const selector: any = {
+      ...(estado && { estado }),
+      ...(idPaciente && { idPaciente }),
+      ...(idDoctor && { idDoctor }),
+      ...(idCitas && { id: { $in: idCitas } })
+    };
+
+    if (fechaInicio && fechaTermino) {
+      selector.fecha = {
+        $gte: fechaInicio.toISOString(),
+        $lte: fechaTermino.toISOString()
+      };
+    }
+  
     const rxCitas : Array<RxCitaDocType> | null = await this.dbService.db.cita.find({
-      selector:{
-        fecha:{
-          $gte: fechaInicio?.toISOString(),
-          $lte: fechaTermino?.toISOString() 
-        },
-        ...(estado && { estado }),
-        ...(idPaciente && { idPaciente }),
-        ...(idDoctor && { idDoctor }),
-        ...(idCita && { idCita })
-      },
+      selector,
       sort:[{
-        fecha:'asc'
-      }]
+        fecha:ordenamiento
+      }],
+      ...(limite && { limit:limite })
     })
     .exec()
 
@@ -95,8 +102,8 @@ export class CitaService {
        idPaciente: rxCita.idPaciente 
       }
 
-      const doctor:DoctorType | null = await this.doctorService.obtenerDoctor(rxCita.idDoctor)
-      const paciente:PacienteType | null = await this.pacienteService.obtenerPaciente(rxCita.idPaciente)
+      const doctor:DoctorType | undefined = await this.doctorService.obtenerDoctor(rxCita.idDoctor)
+      const paciente:PacienteType | undefined = await this.pacienteService.obtenerPaciente(rxCita.idPaciente)
 
       const cita:CitaType = {
         id:rxCita.id,

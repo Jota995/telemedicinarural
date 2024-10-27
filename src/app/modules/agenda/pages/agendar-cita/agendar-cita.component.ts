@@ -39,7 +39,7 @@ export class AgendarCitaComponent implements OnInit {
   ]
 
   public doctores:Array<DoctorType>  | undefined = []
-  public doctor!:DoctorType | null
+  public doctor!:DoctorType | undefined
 
   public minDate = new Date()
   public maxDate!:Date;

@@ -16,14 +16,14 @@ export class DoctorService {
 
   constructor() { }
 
-  async obtenerDoctor(idDoctor:string):Promise<DoctorType | null>{
+  async obtenerDoctor(idDoctor:string):Promise<DoctorType | undefined>{
     const rxDoctor:RxDoctorDocType | null = await this.dbService.db.doctor.findOne({
       selector:{
         id: idDoctor
       }
     }).exec()
 
-    if(!rxDoctor) return null
+    if(!rxDoctor) return undefined
 
     const doctor:DoctorType = {
       id:rxDoctor.id,

@@ -14,7 +14,7 @@ export class PacienteService {
 
   constructor() { }
 
-  async obtenerPaciente(idPaciente:string):Promise<PacienteType | null>{
+  async obtenerPaciente(idPaciente:string):Promise<PacienteType | undefined>{
     const rxPaciente:RxPacienteDocType | null = await this.dbService
       .db
       .paciente
@@ -26,7 +26,7 @@ export class PacienteService {
       .exec()
     
     
-    if(!rxPaciente) return null;
+    if(!rxPaciente) return undefined;
 
     const paciente:PacienteType = {
       id:rxPaciente.id,
