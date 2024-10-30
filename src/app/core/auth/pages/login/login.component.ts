@@ -7,23 +7,21 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
+import { AlertService } from '../../../services/alert.service';
 
-import { MessagesModule } from 'primeng/messages';
-import { Message } from 'primeng/api';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [InputTextModule,PasswordModule,ButtonModule,IconFieldModule,InputIconModule,ReactiveFormsModule,MessagesModule],
+  imports: [InputTextModule,PasswordModule,ButtonModule,IconFieldModule,InputIconModule,ReactiveFormsModule,],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
-  providers:[AuthService]
+  providers:[AuthService,AlertService]
 })
 export class LoginComponent {
   private authService = inject(AuthService)
   private fb = inject(FormBuilder)
-
-  public messages:Array<Message>  = []
+  private alertServ = inject(AlertService)
 
   public form = this.fb.group({
     email:[null,[Validators.required,Validators.email]],
@@ -38,11 +36,7 @@ export class LoginComponent {
       await this.authService.login(email,password)
     } catch (error) {
       console.log("erro", error)
-      const message:Message = {
-        severity:'warn',
-        summary:'Usuario o contraseña incorrectos.'
-      }
-      this.messages.push(message)
+      this.alertServ.showWarn('Inicio seccion fallido.','Usuario o contraseña ingresados son incorrectos.')
     }
   }
 }

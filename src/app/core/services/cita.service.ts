@@ -136,7 +136,8 @@ export class CitaService {
       fecha: cita.fecha,
       estado:cita.estado,
       motivo:cita.motivo,
-      createdAt:new Date().toISOString()
+      createdAt:new Date().toISOString(),
+      updatedAt:new Date().toISOString()
     }
 
     await this.dbService.db.cita.insert(rxCita)

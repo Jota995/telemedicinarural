@@ -57,7 +57,8 @@ export class AgendaResumenPeriodoComponent implements OnInit {
   async obtenerCitas(fechaInicio:Date,fechaTermino:Date){
     this.citas = await this.citaService.obtenerCitas({
       fechaInicio:fechaInicio,
-      fechaTermino: fechaTermino
+      fechaTermino: fechaTermino,
+      ordenamiento:'asc'
     })
   }
 

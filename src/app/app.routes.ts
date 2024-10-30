@@ -32,7 +32,12 @@ export const routes: Routes = [
         loadChildren: () => import('./core/auth/auth.routes').then(m => m.routes)
     },
     {
+        path:'',
+        redirectTo:'/app/agenda/resumen',
+        pathMatch:'full'
+    },
+    {
         path:'**',
-        redirectTo:'/app/home'
+        redirectTo:'/app/agenda/resumen'
     }
 ];
