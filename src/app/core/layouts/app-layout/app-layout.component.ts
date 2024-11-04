@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 
@@ -9,6 +9,11 @@ import { NavbarComponent } from '../../components/navbar/navbar.component';
   templateUrl: './app-layout.component.html',
   styleUrl: './app-layout.component.css'
 })
-export class AppLayoutComponent {
+export class AppLayoutComponent implements OnInit {
+
+
+  ngOnInit(): void {
+    console.log("app layout on init")
+  }
 
 }

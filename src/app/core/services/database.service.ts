@@ -9,6 +9,10 @@ import { citaSchema } from '../models/cita.model';
 import {RxDBJsonDumpPlugin} from 'rxdb/plugins/json-dump'
 import { RxDBUpdatePlugin } from 'rxdb/plugins/update';
 import { isDevMode } from '@angular/core';
+import {environment} from '../../../environments/environment'
+
+import { replicateRxCollection } from 'rxdb/plugins/replication';
+import { agendaSchema } from '../models/agenda.model';
 
 
 addRxPlugin(RxDBJsonDumpPlugin);
@@ -18,12 +22,12 @@ let initState:null|Promise<any>;
 let DB_INSTANCE:any;
 
 async function createDatabase():Promise<any>{
-    const database = await createRxDatabase<any>({
+    const database = await createRxDatabase<RxTelemedicinaDb>({
         name:'telemedicina-db',
         storage:getRxStorageDexie()
     });
 
-    await database.addCollections({
+    const collections = await database.addCollections({
         historialmedico:{
             schema: historialMedicoSchema
         },
@@ -35,8 +39,61 @@ async function createDatabase():Promise<any>{
         },
         cita:{
             schema:citaSchema
+        },
+        agenda:{
+            schema:agendaSchema
         }
     })
+
+    const replicationState = await replicateRxCollection({
+        replicationIdentifier:'https://localhost:7252/api/appointment',
+        collection:collections.cita,
+        retryTime:12000,
+        // pull:{
+        //     async handler(checkpointOrNull, batchSize){
+        //         const updatedAt = checkpointOrNull ? checkpointOrNull.updatedAt : 0;
+        //         const id = checkpointOrNull ? checkpointOrNull.id : '';
+        //         const response = await fetch(`${environment.apiBaseUrl}/pull?updatedAt=${updatedAt}&limit=${batchSize}`)
+        //         const data = await response.json()
+        //         return {
+        //             documents:  data.documents,
+        //             checkpoint: data.checkpoint
+        //         }
+        //     }
+        // },
+        push:{
+            async handler(changeRows){
+                console.log("change rosw first",changeRows)
+                const citasReplication = changeRows.map(x=> x.newDocumentState)
+                console.log("change rows",citasReplication)
+
+
+                const rawResponse = await fetch(`${environment.apiBaseUrl}/api/appointment/push`, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(citasReplication)
+                });
+                const conflicts = await rawResponse.json();
+
+                console.log("conflicts", conflicts)
+
+                return conflicts
+            }
+        }
+    })
+
+    replicationState.error$.subscribe(error =>{
+        console.log("ocurrio un error",error)
+    })
+
+    // replicationState.received$.subscribe((doc) => {
+    //     console.log("recividos ", doc)
+    // });
+
+    // replicationState.sent$.subscribe(doc => console.log("enviados",doc));
 
     await seedDb(database);
 
@@ -45,9 +102,9 @@ async function createDatabase():Promise<any>{
 
 async function seedDb(database:RxTelemedicinaDb){
     try {
-        const idPaciente = 'd17b8f2a-6f01-4f57-853f-d5dee34960e0'
-        const idDoctor = 'e5c0e948-954d-499f-97e2-40092393cf27'
-        const idHistorialMedico = '4f32e1f6-f67f-4e90-a2b4-20fc3ad5a6ee'
+        const idPaciente = '6726902521d29ac63160a06e'
+        const idDoctor = '671d47f26d0a30b333a16c0f'
+        const idHistorialMedico = '6726903ff2f5e67b572472a0'
 
         const existePaciente = await database.paciente.findOne({
             selector:{
@@ -70,7 +127,7 @@ async function seedDb(database:RxTelemedicinaDb){
         if(!existePaciente){
             const newPaciente:RxPacienteDocType = {
                 id:idPaciente,
-                nombre:'Hector Morales',
+                nombre:'Jose Molina',
                 fechaNacimiento:new Date().toISOString(),
                 genero:'masculino',
                 estadoCivil:'soltero',
@@ -90,7 +147,7 @@ async function seedDb(database:RxTelemedicinaDb){
                     'neurologia',
                     'cardiologia'
                 ],
-                agenda: generarFechas('2024-10-27T08:00:00',1),
+                agenda: generarFechas(['2024-10-30T08:00:00','2024-11-05T13:00:00'],1),
                 createdAt: new Date().toISOString()
             }
 
@@ -138,6 +195,7 @@ async function seedDb(database:RxTelemedicinaDb){
 }
 
 export async function initDatabase() {
+
     if (isDevMode()){
         await import('rxdb/plugins/dev-mode').then(
             module => addRxPlugin(module.RxDBDevModePlugin)
@@ -150,32 +208,35 @@ export async function initDatabase() {
     await initState;
 }
 
-function generarFechas(dia:string, intervaloHoras:number):Array<{}> {
-    // Crear un array para almacenar las fechas generadas
-    const fechas = [];
+function generarFechas(diasArray:Array<string>, intervaloHoras:number) {
+    // Crear un array para almacenar todas las fechas generadas
+    const todasLasFechas:Array<any> = [];
     
-    // Convertir el día en un objeto Date (si es que no es un objeto Date)
-    const fechaBase = new Date(dia);
-  
-    // Generar las 6 fechas
-    for (let i = 0; i < 6; i++) {
-      // Crear una nueva fecha a partir de la fecha base
-      const nuevaFecha = new Date(fechaBase);
-      
-      // Sumar el intervalo de horas para cada iteración
-      nuevaFecha.setHours(nuevaFecha.getHours() + (i * intervaloHoras));
+    // Iterar sobre cada día del array de días
+    diasArray.forEach(dia => {
+        // Convertir el día en un objeto Date
+        const fechaBase = new Date(dia);
 
-      const agenda = {
-        fecha:nuevaFecha.toISOString(),
-        estado:'disponible'
-      }
-      
-      // Agregar la fecha al array
-      fechas.push(agenda);
-    }
-  
-    return fechas;
-  }
+        // Crear las 6 fechas para el día actual
+        for (let i = 0; i < 6; i++) {
+            // Crear una nueva fecha a partir de la fecha base
+            const nuevaFecha = new Date(fechaBase);
+            
+            // Sumar el intervalo de horas para cada iteración
+            nuevaFecha.setHours(nuevaFecha.getHours() + (i * intervaloHoras));
+
+            const agenda = {
+                fecha: nuevaFecha.toISOString(),
+                estado: 'disponible'
+            };
+
+            // Agregar la fecha generada al array de todas las fechas
+            todasLasFechas.push(agenda);
+        }
+    });
+
+    return todasLasFechas;
+}
 
 
 @Injectable(

@@ -3,6 +3,7 @@ import { RxDatabaseService } from './database.service';
 import { Observable } from 'rxjs';
 import { DoctorType, RxDoctorDocType } from '../models/doctor.model';
 import { CitaType } from '../models/cita.model';
+import { AgendaService } from './agenda.service';
 
 export type DoctorParamsQuery = {
   especialidad?: string | null
@@ -13,6 +14,7 @@ export type DoctorParamsQuery = {
 })
 export class DoctorService {
   private dbService = inject(RxDatabaseService)
+  private agendaService = inject(AgendaService)
 
   constructor() { }
 
@@ -33,9 +35,13 @@ export class DoctorService {
       estadoCivil: rxDoctor.estadoCivil,
       nacionalidad:rxDoctor.nacionalidad,
       especialidades: rxDoctor.especialidades,
-      agenda:rxDoctor.agenda,
+      IdsAgenda:rxDoctor.IdsAgenda,
       createdAt:rxDoctor.createdAt,
       updatedAt: rxDoctor.updatedAt
+    }
+
+    if(doctor.IdsAgenda && doctor.IdsAgenda.length > 0){
+      doctor.agenda = await this.agendaService.obtenerAgendas({idsAgendas:doctor.IdsAgenda})
     }
 
     return doctor
@@ -66,15 +72,17 @@ export class DoctorService {
         estadoCivil: rxDoctor.estadoCivil,
         nacionalidad:rxDoctor.nacionalidad,
         especialidades: rxDoctor.especialidades,
-        agenda:rxDoctor.agenda,
+        IdsAgenda:rxDoctor.IdsAgenda,
         createdAt:rxDoctor.createdAt,
         updatedAt: rxDoctor.updatedAt
       }
 
+      if(doctor.IdsAgenda && doctor.IdsAgenda.length > 0){
+        doctor.agenda = await this.agendaService.obtenerAgendas({idsAgendas:doctor.IdsAgenda})
+      }
+
       doctores.push(doctor)
     }
-
-    console.log("doctores",doctores)
 
     return doctores
   }

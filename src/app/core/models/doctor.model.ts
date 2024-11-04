@@ -1,4 +1,5 @@
 import { ExtractDocumentTypeFromTypedRxJsonSchema, RxJsonSchema, toTypedRxJsonSchema } from "rxdb"
+import { AgendaType } from "./agenda.model";
 
 export const DOCTOR_SCHEMA_LITERAL = {
     title:'Schema Doctor',
@@ -34,20 +35,11 @@ export const DOCTOR_SCHEMA_LITERAL = {
                 type:'string'
             }
         },
-        agenda:{
-            type:'array',
+        IdsAgenda:{
+            type: "array",
+            ref:"agenda",
             items:{
-                type:'object',
-                properties:{
-                    fecha:{
-                        type:'string',
-                        format:'date-time'
-                    },
-                    estado:{
-                        type:'string',
-                        enum:['disponible','agendada','cancelada','pendiente']
-                    }
-                }
+                type:"string"
             }
         },
         createdAt:{
@@ -69,5 +61,5 @@ export type RxDoctorDocType = ExtractDocumentTypeFromTypedRxJsonSchema<typeof sc
 export const doctorSchema:RxJsonSchema<RxDoctorDocType> = DOCTOR_SCHEMA_LITERAL
 
 export type DoctorType = RxDoctorDocType & {
-    
+    agenda?:Array<AgendaType> | undefined
 }
