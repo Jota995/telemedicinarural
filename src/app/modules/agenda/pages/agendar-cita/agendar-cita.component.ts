@@ -61,7 +61,7 @@ export class AgendarCitaComponent implements OnInit {
 
   buildForm():FormGroup{
     const form = this.fb.group({
-      idPaciente:['6726902521d29ac63160a06e',[Validators.required]],
+      idPaciente:['672acd563f1c484bdf031481',[Validators.required]],
       especialidad:[null,[Validators.required]],
       idDoctor:[null,[Validators.required]],
       fecha:[null,[Validators.required]],

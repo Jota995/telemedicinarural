@@ -47,7 +47,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
             {
               label:'Expedientes médicos',
               icon:'pi pi-folder-open',
-              route:`/app/historial-medico/4f32e1f6-f67f-4e90-a2b4-20fc3ad5a6ee`
+              route:`/app/historial-medico/6726903ff2f5e67b572472a0`
             }
         ];
 

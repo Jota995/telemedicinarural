@@ -102,7 +102,7 @@ async function createDatabase():Promise<any>{
 
 async function seedDb(database:RxTelemedicinaDb){
     try {
-        const idPaciente = '6726902521d29ac63160a06e'
+        const idPaciente = '672acd563f1c484bdf031481'
         const idDoctor = '6726d7fbff280067c1de9582'
         const idHistorialMedico = '6726903ff2f5e67b572472a0'
 
