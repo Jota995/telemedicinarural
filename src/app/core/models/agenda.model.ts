@@ -27,7 +27,7 @@ export const AGENDA_SCHEMA_LITERAL = {
         },
         estado:{
             type:'string',
-            enum:["disponible", "cancelada", "completada", "no_asistida"],
+            enum:["disponible", "cancelada", "completada", "no_asistida","pendiente"],
 
         },
         createdAt: {

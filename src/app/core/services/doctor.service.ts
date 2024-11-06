@@ -92,21 +92,16 @@ export class DoctorService {
 
     if(!doctor?.agenda) return
 
-    const agendaActualizada = doctor.agenda.map((old:any) => {
-      if (old.fecha === cita.fecha) {
-        return { ...old, estado: 'pendiente' }; // Actualiza el estado de la cita
-      }
-      return old; // No modificar otras citas
-    });
+    const agenda = doctor.agenda.find(x => x.fecha == cita.fecha.toString())
 
-    await this.dbService.db.doctor.findOne({
+    await this.dbService.db.agenda.findOne({
       selector:{
-        id: cita.idDoctor
+        id: agenda?.id
       }
     })
     .update({
       $set: {
-        agenda: agendaActualizada
+        estado:'pendiente'
       }
     });
   }

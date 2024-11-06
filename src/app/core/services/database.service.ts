@@ -12,7 +12,7 @@ import { isDevMode } from '@angular/core';
 import {environment} from '../../../environments/environment'
 
 import { replicateRxCollection } from 'rxdb/plugins/replication';
-import { agendaSchema } from '../models/agenda.model';
+import { agendaSchema, RxAgendaDocType } from '../models/agenda.model';
 
 
 addRxPlugin(RxDBJsonDumpPlugin);
@@ -103,7 +103,7 @@ async function createDatabase():Promise<any>{
 async function seedDb(database:RxTelemedicinaDb){
     try {
         const idPaciente = '6726902521d29ac63160a06e'
-        const idDoctor = '671d47f26d0a30b333a16c0f'
+        const idDoctor = '6726d7fbff280067c1de9582'
         const idHistorialMedico = '6726903ff2f5e67b572472a0'
 
         const existePaciente = await database.paciente.findOne({
@@ -140,6 +140,46 @@ async function seedDb(database:RxTelemedicinaDb){
         }
 
         if(!existeDoctor){
+            
+            const agenda:Array<RxAgendaDocType> = [
+                {
+                    id:'672a8fd958db34bbe288b30d',
+                    idDoctor:idDoctor,
+                    especialidad:'neurologia',
+                    fecha: new Date(2024,10,9,11).toISOString(),
+                    estado:'disponible',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                },
+                {
+                    id:'672a8fe90b6aa5eb4cc39257',
+                    idDoctor:idDoctor,
+                    especialidad:'neurologia',
+                    fecha: new Date(2024,10,9,13).toISOString(),
+                    estado:'disponible',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                },
+                {
+                    id:'672a8ff60c75e773dc2167d4',
+                    idDoctor:idDoctor,
+                    especialidad:'neurologia',
+                    fecha: new Date(2024,10,22,11).toISOString(),
+                    estado:'disponible',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                },
+                {
+                    id:'672a8ff60c75e773dc2167d4',
+                    idDoctor:idDoctor,
+                    especialidad:'neurologia',
+                    fecha: new Date(2024,10,22,9).toISOString(),
+                    estado:'disponible',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                }
+            ]
+
             const newDoctor:RxDoctorDocType = {
                 id:idDoctor,
                 nombre:'Pedro Fernandez',
@@ -147,11 +187,16 @@ async function seedDb(database:RxTelemedicinaDb){
                     'neurologia',
                     'cardiologia'
                 ],
-                agenda: generarFechas(['2024-10-30T08:00:00','2024-11-05T13:00:00'],1),
+                IdsAgenda: agenda.map(x => x.id).filter((id): id is string => id !== undefined),
                 createdAt: new Date().toISOString()
             }
 
             await database.doctor.insert(newDoctor);
+
+
+            await database.agenda.bulkInsert(agenda)
+
+
             console.log("doctor insertado correctamente");
         }
 
