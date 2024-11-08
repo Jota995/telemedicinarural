@@ -10,8 +10,8 @@ import { CitaType } from '../../../../core/models/cita.model';
   selector: 'app-agenda-resumen-periodo',
   standalone: true,
   imports: [DataViewModule,AsyncPipe, NgClass, NgFor, AvatarModule, DatePipe],
-  templateUrl: './agenda-resumen-periodo.component.html',
-  styleUrl: './agenda-resumen-periodo.component.css',
+  templateUrl: './citas-resumen-periodo.component.html',
+  styleUrl: './citas-resumen-periodo.component.css',
   providers:[CitaService]
 })
 export class AgendaResumenPeriodoComponent implements OnInit {

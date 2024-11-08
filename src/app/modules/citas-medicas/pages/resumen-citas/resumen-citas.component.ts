@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { AvatarModule } from 'primeng/avatar';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { CitaType } from '../../../../core/models/cita.model'
 import { CitaService } from '../../../../core/services/cita.service';
@@ -11,11 +11,11 @@ import { CitaService } from '../../../../core/services/cita.service';
   selector: 'app-agenda',
   standalone: true,
   imports: [AvatarModule,CardModule,ButtonModule, RouterModule,AsyncPipe,DatePipe],
-  templateUrl: './agenda.component.html',
-  styleUrl: './agenda.component.css',
+  templateUrl: './resumen-citas.component.html',
+  styleUrl: './resumen-citas.component.css',
   providers:[CitaService]
 })
-export class AgendaComponent implements OnInit{
+export class ResumenCitasComponent implements OnInit{
   private citaService = inject(CitaService)
 
   public citasProgramadasEnElMes: number = 0;

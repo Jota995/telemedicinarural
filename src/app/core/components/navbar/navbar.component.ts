@@ -42,7 +42,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
             {
               label: 'Citas Médicas',
               icon: 'pi pi-calendar',
-              route:'/app/agenda/resumen'
+              route:'/app/citas-medicas/resumen'
             },
             {
               label:'Expedientes médicos',

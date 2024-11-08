@@ -3,11 +3,11 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
     {
         path:'resumen',
-        loadComponent:() => import('./pages/agenda/agenda.component').then(mod => mod.AgendaComponent)
+        loadComponent:() => import('./pages/resumen-citas/resumen-citas.component').then(mod => mod.ResumenCitasComponent)
     },
     {
         path:'periodo/:periodo',
-        loadComponent: () => import('./pages/agenda-resumen-periodo/agenda-resumen-periodo.component').then(mod => mod.AgendaResumenPeriodoComponent)
+        loadComponent: () => import('./pages/resumen-citas/resumen-citas.component').then(mod => mod.ResumenCitasComponent)
     },
     {
         path:'agendar-cita',

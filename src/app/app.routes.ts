@@ -16,8 +16,8 @@ export const routes: Routes = [
                 loadComponent:() => import('./core/pages/home/home.component').then(mod => mod.HomeComponent)
             },
             {
-                path:'agenda',
-                loadChildren: () => import('./modules/agenda/agenda.routes').then(mod => mod.routes)
+                path:'citas-medicas',
+                loadChildren: () => import('./modules/citas-medicas/citas-medicas.routes').then(mod => mod.routes)
             },
             {
                 path:'historial-medico',
