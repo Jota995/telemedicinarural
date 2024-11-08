@@ -22,7 +22,7 @@ import { DoctorType } from '../../../../core/models/doctor.model';
   imports: [ButtonModule,DropdownModule,InputTextareaModule,CalendarModule,ReactiveFormsModule,AsyncPipe],
   templateUrl: './agendar-cita.component.html',
   styleUrl: './agendar-cita.component.css',
-  providers:[DoctorService,CitaService,FormBuilder,Router,AlertService]
+  providers:[DoctorService,CitaService,FormBuilder,AlertService]
 })
 export class AgendarCitaComponent implements OnInit {
   private alertService = inject(AlertService)

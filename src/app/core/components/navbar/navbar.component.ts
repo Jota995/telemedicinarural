@@ -18,16 +18,51 @@ import { Router } from '@angular/router';
   imports: [MenubarModule,AvatarModule,BadgeModule,CommonModule,ButtonModule,TieredMenuModule],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css',
-  providers:[AuthService,UserService,Router]
+  providers:[AuthService,UserService]
 })
 export class NavbarComponent implements OnInit, OnDestroy {
   authService = inject(AuthService)
   userService = inject(UserService)
-  router = inject(Router)
 
   items: MenuItem[] | undefined;
   userItems:MenuItem[] | undefined;
   user$!:Observable<User>
+
+  constructor(){
+    console.log("navbar on init")
+
+    this.user$= this.userService.getUser();
+
+    this.items = [
+            {
+              label: 'Inicio',
+              icon: 'pi pi-home',
+              route:'/app/home'
+            },
+            {
+              label: 'Citas Médicas',
+              icon: 'pi pi-calendar',
+              route:'/app/agenda/resumen'
+            },
+            {
+              label:'Expedientes médicos',
+              icon:'pi pi-folder-open',
+              route:`/app/historial-medico/6726903ff2f5e67b572472a0`
+            }
+        ];
+
+    this.userItems =  [
+      {
+        label:'Ver Perfil',
+        icon:'pi pi-user'
+      },
+      {
+          label: 'Cerrar Session',
+          icon: 'pi pi-sign-out',
+          command: () => {this.authService.logout()}
+      }
+    ];
+  }
 
   ngOnInit(): void {
     console.log("navbar on init")
@@ -61,7 +96,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
           icon: 'pi pi-sign-out',
           command: () => {this.authService.logout()}
       }
-  ];
+    ];
   }
 
   ngOnDestroy(): void {

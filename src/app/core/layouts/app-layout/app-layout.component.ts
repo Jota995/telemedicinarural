@@ -9,11 +9,13 @@ import { NavbarComponent } from '../../components/navbar/navbar.component';
   templateUrl: './app-layout.component.html',
   styleUrl: './app-layout.component.css'
 })
-export class AppLayoutComponent implements OnInit {
+export class AppLayoutComponent{
 
-
-  ngOnInit(): void {
-    console.log("app layout on init")
+  constructor(){
+    console.log("ejecutando logica app layout")
   }
+  // ngOnInit(): void {
+  //   console.log("app layout on init")
+  // }
 
 }

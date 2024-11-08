@@ -10,13 +10,12 @@ import { CitaService } from '../../../../core/services/cita.service';
 @Component({
   selector: 'app-agenda',
   standalone: true,
-  imports: [AvatarModule,CardModule,ButtonModule,RouterModule, AsyncPipe,DatePipe],
+  imports: [AvatarModule,CardModule,ButtonModule, RouterModule,AsyncPipe,DatePipe],
   templateUrl: './agenda.component.html',
   styleUrl: './agenda.component.css',
-  providers:[CitaService,Router]
+  providers:[CitaService]
 })
 export class AgendaComponent implements OnInit{
-  private router = inject(Router)
   private citaService = inject(CitaService)
 
   public citasProgramadasEnElMes: number = 0;
