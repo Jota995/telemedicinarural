@@ -20,6 +20,10 @@ export const routes: Routes = [
                 loadChildren: () => import('./modules/citas-medicas/citas-medicas.routes').then(mod => mod.routes)
             },
             {
+                path:'agenda-medica',
+                loadChildren: () => import('./modules/agenda-medica/agenda-medica.routes').then(mod => mod.routes)
+            },
+            {
                 path:'historial-medico',
                 loadChildren: () => import('./modules/expediente-medico/expediente-medico.routes').then(m => m.routes)
             }
@@ -38,6 +42,6 @@ export const routes: Routes = [
     },
     {
         path:'**',
-        redirectTo:'/app/agenda/resumen'
+        redirectTo:'/app/citas-medicas/resumen'
     }
 ];
