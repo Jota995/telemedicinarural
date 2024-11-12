@@ -10,7 +10,7 @@ import { CitaService } from '../../../../core/services/cita.service';
 @Component({
   selector: 'app-agenda',
   standalone: true,
-  imports: [AvatarModule,CardModule,ButtonModule, RouterModule,AsyncPipe,DatePipe],
+  imports: [AvatarModule,CardModule,ButtonModule, RouterModule,DatePipe],
   templateUrl: './resumen-citas.component.html',
   styleUrl: './resumen-citas.component.css',
   providers:[CitaService]

@@ -9,12 +9,12 @@ import { CitaType } from '../../../../core/models/cita.model';
 @Component({
   selector: 'app-agenda-resumen-periodo',
   standalone: true,
-  imports: [DataViewModule,AsyncPipe, NgClass, NgFor, AvatarModule, DatePipe],
+  imports: [DataViewModule, AvatarModule, DatePipe],
   templateUrl: './citas-resumen-periodo.component.html',
   styleUrl: './citas-resumen-periodo.component.css',
   providers:[CitaService]
 })
-export class AgendaResumenPeriodoComponent implements OnInit {
+export class CitaResumenPeriodoComponent implements OnInit {
   private activateRotue = inject(ActivatedRoute)
   private citaService = inject(CitaService)
 

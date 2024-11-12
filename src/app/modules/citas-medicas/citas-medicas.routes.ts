@@ -7,7 +7,7 @@ export const routes: Routes = [
     },
     {
         path:'periodo/:periodo',
-        loadComponent: () => import('./pages/resumen-citas/resumen-citas.component').then(mod => mod.ResumenCitasComponent)
+        loadComponent: () => import('./pages/citas-resumen-periodo/citas-resumen-periodo.component').then(mod => mod.CitaResumenPeriodoComponent)
     },
     {
         path:'agendar-cita',
