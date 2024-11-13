@@ -14,12 +14,13 @@ import { CitaType, RxCitaDocType } from '../../../../core/models/cita.model';
 import { DoctorParamsQuery, DoctorService } from '../../../../core/services/doctor.service';
 import { CitaService } from '../../../../core/services/cita.service';
 import { DoctorType } from '../../../../core/models/doctor.model';
+import {combinarFechas} from '../../../../shared/helpers'
 
 
 @Component({
   selector: 'app-agendar-cita',
   standalone: true,
-  imports: [ButtonModule,DropdownModule,InputTextareaModule,CalendarModule,ReactiveFormsModule,AsyncPipe],
+  imports: [ButtonModule,DropdownModule,InputTextareaModule,CalendarModule,ReactiveFormsModule],
   templateUrl: './agendar-cita.component.html',
   styleUrl: './agendar-cita.component.css',
   providers:[DoctorService,CitaService,FormBuilder,AlertService]
@@ -195,7 +196,7 @@ export class AgendarCitaComponent implements OnInit {
         idPaciente: values.idPaciente,
         idDoctor:values.idDoctor,
         especialidad: values.especialidad,
-        fecha: this.combinarFechas(values.fecha,values.hora),
+        fecha: combinarFechas(values.fecha,values.hora),
         estado:'pendiente',
         motivo:values.motivo,
         createdAt:new Date().toISOString(),
@@ -229,18 +230,6 @@ export class AgendarCitaComponent implements OnInit {
     });
   }
 
-  combinarFechas(fechaPrincipal:Date, fechaHora:Date):string {
-    // Crear una nueva fecha basada en la fechaPrincipal (para no modificar el original)
-    const nuevaFecha = new Date(fechaPrincipal);
-  
-    // Establecer las horas y minutos de la segunda fecha (fechaHora) en la nueva fecha
-    nuevaFecha.setHours(fechaHora.getHours());
-    nuevaFecha.setMinutes(fechaHora.getMinutes());
-    nuevaFecha.setSeconds(0);  // Puedes ajustar según sea necesario
-    nuevaFecha.setMilliseconds(0);  // Opcional: ajustar milisegundos
-  
-    return nuevaFecha.toISOString();
-  }
 
   generarFechasDeshabilitadas(fechasPermitidas: Date[]): Date[] {
     const fechasDeshabilitadas: Date[] = [];
