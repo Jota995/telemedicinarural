@@ -35,7 +35,7 @@ export const DOCTOR_SCHEMA_LITERAL = {
                 type:'string'
             }
         },
-        IdsAgenda:{
+        idsAgenda:{
             type: "array",
             ref:"agenda",
             items:{

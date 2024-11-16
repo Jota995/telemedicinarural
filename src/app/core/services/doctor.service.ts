@@ -27,6 +27,8 @@ export class DoctorService {
 
     if(!rxDoctor) return undefined
 
+    console.log("Rx doctor",rxDoctor)
+
     const doctor:DoctorType = {
       id:rxDoctor.id,
       nombre:rxDoctor.nombre,
@@ -35,13 +37,15 @@ export class DoctorService {
       estadoCivil: rxDoctor.estadoCivil,
       nacionalidad:rxDoctor.nacionalidad,
       especialidades: rxDoctor.especialidades,
-      IdsAgenda:rxDoctor.IdsAgenda,
+      idsAgenda:rxDoctor.idsAgenda,
       createdAt:rxDoctor.createdAt,
       updatedAt: rxDoctor.updatedAt
     }
 
-    if(doctor.IdsAgenda && doctor.IdsAgenda.length > 0){
-      doctor.agenda = await this.agendaService.obtenerAgendas({idsAgendas:doctor.IdsAgenda})
+    console.log("obtener doctor",doctor)
+
+    if(doctor.idsAgenda && doctor.idsAgenda.length > 0){
+      doctor.agenda = await this.agendaService.obtenerAgendas({idsAgendas:doctor.idsAgenda})
     }
 
     return doctor
@@ -72,13 +76,13 @@ export class DoctorService {
         estadoCivil: rxDoctor.estadoCivil,
         nacionalidad:rxDoctor.nacionalidad,
         especialidades: rxDoctor.especialidades,
-        IdsAgenda:rxDoctor.IdsAgenda,
+        idsAgenda:rxDoctor.idsAgenda,
         createdAt:rxDoctor.createdAt,
         updatedAt: rxDoctor.updatedAt
       }
 
-      if(doctor.IdsAgenda && doctor.IdsAgenda.length > 0){
-        doctor.agenda = await this.agendaService.obtenerAgendas({idsAgendas:doctor.IdsAgenda})
+      if(doctor.idsAgenda && doctor.idsAgenda.length > 0){
+        doctor.agenda = await this.agendaService.obtenerAgendas({idsAgendas:doctor.idsAgenda})
       }
 
       doctores.push(doctor)

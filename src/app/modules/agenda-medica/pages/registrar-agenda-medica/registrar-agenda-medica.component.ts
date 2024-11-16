@@ -9,6 +9,7 @@ import { AgendaMedicaService } from '../../services/agenda-medica.service';
 import { AgendaType } from '../../../../core/models/agenda.model';
 import { AlertService } from '../../../../core/services/alert.service';
 import { combinarFechas } from '../../../../shared/helpers';
+import { AgendaService } from '../../../../core/services/agenda.service';
 
 
 @Component({
@@ -17,13 +18,13 @@ import { combinarFechas } from '../../../../shared/helpers';
   imports: [ReactiveFormsModule,DropdownModule,CalendarModule],
   templateUrl: './registrar-agenda-medica.component.html',
   styleUrl: './registrar-agenda-medica.component.css',
-  providers:[DoctorService,AgendaMedicaService,AlertService]
+  providers:[DoctorService,AgendaService,AlertService]
 })
 export class RegistrarAgendaMedicaComponent implements OnInit {
  
   private fb:FormBuilder = inject(FormBuilder)
   private doctorService:DoctorService = inject(DoctorService)
-  private agendaMedicaService = inject(AgendaMedicaService)
+  private agendaMedicaService = inject(AgendaService)
   private alertService = inject(AlertService)
 
   public especialidadesdMedicasDoctor:Array<string> = []
@@ -69,9 +70,10 @@ export class RegistrarAgendaMedicaComponent implements OnInit {
       console.log("form",this.form.getRawValue())
       console.log("agenda ",agenda)
 
-      await this.agendaMedicaService.guardarAgendaMedica(agenda)
+      await this.agendaMedicaService.guardarAgenda(agenda);
 
       this.alertService.showSuccess("Agenda guardada","Su hora ha sido guardada")
+      
     } catch (error) {
       console.log("error al guardar cita",error)
     }

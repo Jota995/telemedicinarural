@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
-import { AgendaType } from '../models/agenda.model';
+import { AgendaType, RxAgendaDocType } from '../models/agenda.model';
 import { RxDatabaseService } from './database.service';
+import { ObjectId } from 'bson';
 
 
 export type AgendaQueryParams = {
@@ -44,6 +45,22 @@ export class AgendaService {
 
     return arrayAgenda;
 
+  }
+
+  async guardarAgenda(agenda:AgendaType){
+
+    const objectId = new ObjectId().toHexString()
+    const rxAgenda:RxAgendaDocType = {
+      id:objectId,
+      idDoctor:agenda.idDoctor,
+      especialidad:agenda.especialidad,
+      fecha:agenda.fecha,
+      estado:agenda.estado,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }
+
+    await this.dbService.db.agenda.insert(rxAgenda);
   }
 
 }

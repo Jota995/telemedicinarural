@@ -5,6 +5,7 @@ import { PacienteParamsQuery, PacienteService } from './paciente.service';
 import { CitaType, RxCitaDocType } from '../models/cita.model';
 import { DoctorType } from '../models/doctor.model';
 import { PacienteType } from '../models/paciente.model';
+import { ObjectId } from 'bson';
 
 export type CitasQueryParams = {
   idCitas?:Array<string>
@@ -128,8 +129,11 @@ export class CitaService {
   }
 
   async agendarCita(cita:CitaType):Promise<void>{
+
+    const objectId = new ObjectId().toHexString()
+
     const rxCita:RxCitaDocType= {
-      id: Date.now().toString(36) + Math.random().toString(36).substring(2),
+      id: objectId,
       idPaciente: cita.idPaciente,
       idDoctor:cita.idDoctor,
       especialidad: cita.especialidad,

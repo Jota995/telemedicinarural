@@ -45,57 +45,144 @@ async function createDatabase():Promise<any>{
         }
     })
 
-    const replicationState = await replicateRxCollection({
-        replicationIdentifier:'https://localhost:7252/api/appointment',
-        collection:collections.cita,
+    const replicationStateDoctores = await replicateRxCollection({
+        replicationIdentifier:'https://localhost:7252/api/doctor',
+        collection: collections.doctor,
         retryTime:12000,
-        // pull:{
-        //     async handler(checkpointOrNull, batchSize){
-        //         const updatedAt = checkpointOrNull ? checkpointOrNull.updatedAt : 0;
-        //         const id = checkpointOrNull ? checkpointOrNull.id : '';
-        //         const response = await fetch(`${environment.apiBaseUrl}/pull?updatedAt=${updatedAt}&limit=${batchSize}`)
-        //         const data = await response.json()
-        //         return {
-        //             documents:  data.documents,
-        //             checkpoint: data.checkpoint
-        //         }
-        //     }
-        // },
-        push:{
-            async handler(changeRows){
-                console.log("change rosw first",changeRows)
-                const citasReplication = changeRows.map(x=> x.newDocumentState)
-                console.log("change rows",citasReplication)
+        pull:{
+            async handler(checkpointOrNull, batchSize){
+                const updatedAt:string|null = checkpointOrNull ? (checkpointOrNull as { updatedAt: string }).updatedAt : null;
 
+                const baseUrl = `${environment.apiBaseUrl}/api/doctor/pulldata`;
 
-                const rawResponse = await fetch(`${environment.apiBaseUrl}/api/appointment/push`, {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(citasReplication)
-                });
-                const conflicts = await rawResponse.json();
+                const queryParams = new URLSearchParams();
 
-                console.log("conflicts", conflicts)
+                if (updatedAt !== null) {
+                    queryParams.append("UpdatedAt", updatedAt);
+                }
 
-                return conflicts
+                queryParams.append("limit", String(batchSize));
+
+                const response = await fetch(`${baseUrl}?${queryParams.toString()}`)
+                const data = await response.json()
+                return {
+                    documents:  data.documents,
+                    checkpoint: {updatedAt:data.checkpoint}
+                }
+            }
+        },
+    });
+    replicationStateDoctores.error$.subscribe(erro =>{
+        console.log("error replication doctor",erro)
+    })
+
+    const replicationStateCitas = await replicateRxCollection(
+        {
+            replicationIdentifier:'https://localhost:7252/api/appointment',
+            collection:collections.cita,
+            retryTime:12000,
+            pull:{
+                async handler(checkpointOrNull, batchSize){
+                    const updatedAt:string|null = checkpointOrNull ? (checkpointOrNull as { updatedAt: string }).updatedAt : null;
+
+                    const baseUrl = `${environment.apiBaseUrl}/api/cita/pulldata`;
+
+                    const queryParams = new URLSearchParams();
+
+                    if (updatedAt !== null) {
+                        queryParams.append("updatedAt", updatedAt);
+                    }
+
+                    queryParams.append("limit", String(batchSize));
+
+                    const response = await fetch(`${baseUrl}?${queryParams.toString()}`)
+
+                    const data = await response.json()
+
+                    return {
+                        documents:  data.documents,
+                        checkpoint: {updatedAt:data.checkpoint}
+                    }
+                }
+            },
+            push:{
+                async handler(changeRows){
+                    const citasReplication = changeRows.map(x=> x.newDocumentState)
+                    const rawResponse = await fetch(`${environment.apiBaseUrl}/api/cita/push`, {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(citasReplication)
+                    });
+                    const conflicts = await rawResponse.json();
+                    return conflicts
+                }
             }
         }
+    )
+
+    replicationStateCitas.error$.subscribe(error =>{
+        console.log("ocurrio un error cita medica",error)
     })
 
-    replicationState.error$.subscribe(error =>{
-        console.log("ocurrio un error",error)
+    const replicationStateAgendaMedica = await replicateRxCollection(
+        {
+            replicationIdentifier:'https://localhost:7252/api/agenda',
+            collection:collections.agenda,
+            retryTime:50000,
+            pull:{
+                async handler(checkpointOrNull, batchSize){
+                    const baseUrl = `${environment.apiBaseUrl}/api/agenda/pulldata`;
+
+                    const updatedAt:string|null = checkpointOrNull ? (checkpointOrNull as { updatedAt: string }).updatedAt : null;
+                    const queryParams = new URLSearchParams();
+
+                    if (updatedAt !== null) {
+                        queryParams.append("UpdatedAt", updatedAt);
+                    }
+
+                    queryParams.append("Limit", String(batchSize));
+                    queryParams.append("Estado", "disponible");
+
+                    const response = await fetch(`${baseUrl}?${queryParams.toString()}`)
+                    const data = await response.json()
+                    console.log("response data agenda", data)
+                    return {
+                        documents:  data.documents,
+                        checkpoint: {updatedAt:data.checkpoint}
+                    }
+                }
+            },
+            push:{
+                async handler(changeRows){
+                    const agendaMedicaReplication = changeRows.map(x=> x.newDocumentState)
+
+                    const rawResponse = await fetch(`${environment.apiBaseUrl}/api/agenda/pushdata`, {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(agendaMedicaReplication)
+                    });
+                    const conflicts = await rawResponse.json();
+
+                    console.log("conflicts", conflicts)
+
+                    return conflicts
+                }
+            }
+        }
+    )
+
+    replicationStateAgendaMedica.error$.subscribe(error =>{
+        console.log("ocurrio un error en agenda replication\n",error)
     })
 
-    // replicationState.received$.subscribe((doc) => {
-    //     console.log("recividos ", doc)
-    // });
 
-    // replicationState.sent$.subscribe(doc => console.log("enviados",doc));
-
-    await seedDb(database);
+    // await seedDb(database);
 
     return database;
 }
@@ -187,14 +274,14 @@ async function seedDb(database:RxTelemedicinaDb){
                     'neurologia',
                     'cardiologia'
                 ],
-                IdsAgenda: agenda.map(x => x.id).filter((id): id is string => id !== undefined),
+                // IdsAgenda: agenda.map(x => x.id).filter((id): id is string => id !== undefined),
                 createdAt: new Date().toISOString()
             }
 
             await database.doctor.insert(newDoctor);
 
 
-            await database.agenda.bulkInsert(agenda)
+            // await database.agenda.bulkInsert(agenda)
 
 
             console.log("doctor insertado correctamente");

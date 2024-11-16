@@ -113,6 +113,9 @@ export class AgendarCitaComponent implements OnInit {
       .subscribe(async (idDoctor) =>{
         this.doctor = await this.doctorService.obtenerDoctor(idDoctor || '')
 
+        console.log("agenda docta",this.doctor)
+
+
         if(!this.doctor || !this.doctor.agenda) return
 
         const agenda = this.doctor.agenda.filter((x:any) => x.estado === 'disponible').map((x:any) => new Date(x.fecha))
@@ -141,7 +144,6 @@ export class AgendarCitaComponent implements OnInit {
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe(fecha =>{
-
         if(!this.doctor?.agenda) return
 
         const agenda = this.doctor
