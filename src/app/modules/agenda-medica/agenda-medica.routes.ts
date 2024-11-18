@@ -8,5 +8,9 @@ export const routes: Routes = [
     {
         path:'registrar',
         loadComponent: () => import('./pages/registrar-agenda-medica/registrar-agenda-medica.component').then(m => m.RegistrarAgendaMedicaComponent)
+    },
+    {
+        path:'editar/:id',
+        loadComponent: () => import('./pages/editar-agenda-medica/editar-agenda-medica.component').then(m => m.EditarAgendaMedicaComponent)
     }
 ];

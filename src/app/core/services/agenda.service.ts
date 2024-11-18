@@ -5,6 +5,7 @@ import { ObjectId } from 'bson';
 
 
 export type AgendaQueryParams = {
+  idDoctor?:string
   idsAgendas?:Array<string>
 }
 
@@ -17,12 +18,15 @@ export class AgendaService {
 
   constructor() { }
 
-  async obtenerAgendas({idsAgendas}:AgendaQueryParams):Promise<Array<AgendaType>>{
+  async obtenerAgendas({idsAgendas, idDoctor}:AgendaQueryParams):Promise<Array<AgendaType>>{
     const arrayAgenda:Array<AgendaType> = [];
+
+    console.log("ids agenda",idsAgendas)
 
     const rxAgendas = await this.dbService.db.agenda.find({
       selector:{
-        ...(idsAgendas && { id: { $in: idsAgendas } })
+        ...(idsAgendas && { id: { $in: idsAgendas } }),
+        ...(idDoctor && {idDoctor})
       }
     })
     .exec();
@@ -61,6 +65,22 @@ export class AgendaService {
     }
 
     await this.dbService.db.agenda.insert(rxAgenda);
+  }
+
+  async actualizarAgenda(agenda:AgendaType){
+    await this.dbService.db.agenda.findOne({
+      selector:{
+        id: agenda?.id
+      }
+    })
+    .update({
+      $set: {
+        especialidad: agenda.especialidad,
+        fecha:agenda.fecha,
+        estado: agenda.estado,
+        updatedAt: new Date().toISOString()
+      }
+    });
   }
 
 }

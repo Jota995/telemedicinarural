@@ -6,6 +6,8 @@ import { CitaType, RxCitaDocType } from '../models/cita.model';
 import { DoctorType } from '../models/doctor.model';
 import { PacienteType } from '../models/paciente.model';
 import { ObjectId } from 'bson';
+import { Observable,from } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
 export type CitasQueryParams = {
   idCitas?:Array<string>
@@ -84,7 +86,7 @@ export class CitaService {
         $lte: fechaTermino.toISOString()
       };
     }
-  
+    
     const rxCitas : Array<RxCitaDocType> | null = await this.dbService.db.cita.find({
       selector,
       sort:[{
@@ -94,15 +96,10 @@ export class CitaService {
     })
     .exec()
 
-    console.log("rxcitas ",rxCitas)
 
     if(!rxCitas || !rxCitas.length) return citas
 
     for(const rxCita of rxCitas){
-      const pacienteQuery:PacienteParamsQuery = {
-       idPaciente: rxCita.idPaciente 
-      }
-
       const doctor:DoctorType | undefined = await this.doctorService.obtenerDoctor(rxCita.idDoctor)
       const paciente:PacienteType | undefined = await this.pacienteService.obtenerPaciente(rxCita.idPaciente)
 
@@ -127,6 +124,64 @@ export class CitaService {
 
     return citas
   }
+  
+  obtenerCitas$({fechaInicio, fechaTermino, idPaciente,idDoctor,estado,idCitas,limite,ordenamiento= 'asc'}:CitasQueryParams):Observable<Array<CitaType>>
+  {
+    const selector: any = {
+      ...(estado && { estado }),
+      ...(idPaciente && { idPaciente }),
+      ...(idDoctor && { idDoctor }),
+      ...(idCitas && { id: { $in: idCitas } })
+    };
+
+    if (fechaInicio && fechaTermino) {
+      selector.fecha = {
+        $gte: fechaInicio.toISOString(),
+        $lte: fechaTermino.toISOString()
+      };
+    }
+
+    return this.dbService.db.cita.find({
+      selector,
+      sort:[{
+        fecha:ordenamiento
+      }],
+      ...(limite && { limit:limite })
+    })
+    .$
+    .pipe(
+      switchMap((rxCitas: Array<RxCitaDocType> | null) => {
+        if (!rxCitas || !rxCitas.length) {
+          return from([[]]); // Devuelve un Observable con un array vacío
+        }
+
+        // Procesar cada `rxCita` para obtener su doctor y paciente
+        return from(Promise.all(rxCitas.map(async (rxCita) => {
+          const doctor = await this.doctorService.obtenerDoctor(rxCita.idDoctor);
+          const paciente = await this.pacienteService.obtenerPaciente(rxCita.idPaciente);
+
+          const cita: CitaType = {
+            id: rxCita.id,
+            idPaciente: rxCita.idPaciente,
+            idDoctor: rxCita.idDoctor,
+            especialidad: rxCita.especialidad,
+            fecha: rxCita.fecha,
+            estado: rxCita.estado,
+            motivo: rxCita.motivo,
+            inicio: rxCita.inicio,
+            fin: rxCita.fin,
+            createdAt: rxCita.createdAt,
+            updatedAt: rxCita.updatedAt,
+            doctor,
+            paciente,
+          };
+
+          return cita;
+        })));
+      })
+    );
+
+  }
 
   async agendarCita(cita:CitaType):Promise<void>{
 
@@ -149,7 +204,7 @@ export class CitaService {
     await this.doctorService.marcarAgenda(cita);
   }
 
-  async citasDelMes():Promise<number>{
+  citasDelMes():Observable<number>{
     const fechaActual = new Date();
   
     // Obtener el primer día del mes
@@ -158,19 +213,18 @@ export class CitaService {
     // Obtener el último día del mes
     const ultimoDiaMes = new Date(fechaActual.getFullYear(), fechaActual.getMonth() + 1, 0);
 
-    const citasDelMes = await this.dbService
+    return this.dbService
       .db
       .cita
       .count({
         selector:{
+          estado: "programada",
           fecha:{
             $gte: primerDiaMes.toISOString(),
             $lte: ultimoDiaMes.toISOString() 
           }
         }
       })
-      .exec()
-
-    return citasDelMes || 0;
+      .$;
   }
 }

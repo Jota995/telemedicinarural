@@ -96,7 +96,7 @@ export class DoctorService {
 
     if(!doctor?.agenda) return
 
-    const agenda = doctor.agenda.find(x => x.fecha == cita.fecha.toString())
+    const agenda = doctor.agenda.find(x => x.fecha == cita.fecha)
 
     await this.dbService.db.agenda.findOne({
       selector:{
@@ -105,7 +105,8 @@ export class DoctorService {
     })
     .update({
       $set: {
-        estado:'pendiente'
+        estado:'pendiente',
+        updatedAt: new Date().toISOString()
       }
     });
   }

@@ -68,7 +68,7 @@
             <ng-template pTemplate="content" >
                 <div class="flex flex-column text-center gap-3">
                     <span class="font-bold text-xl">Citas Programadas</span>
-                    <span class="text-xl">{{citasProgramadasEnElMes}}</span>
+                    <span class="text-xl">{{citasProgramadasEnElMes | async}}</span>
                 </div>
             </ng-template>
         </p-card>

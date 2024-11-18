@@ -1,0 +1,37 @@
+<form [formGroup]="form" class="p-3" (ngSubmit)="onSubmit()" class="flex flex-column p-3">
+    <h1>Actualizar Agenda Medica</h1>
+
+    <h4>Especialidad medica</h4>
+        <section>
+            <p-dropdown 
+            formControlName="especialidadMedica" 
+            [options]="especialidadesdMedicasDoctor" 
+            placeholder="Seleccione una especialidad medica" 
+            styleClass="w-full"/>
+        </section>
+
+        <section>
+            <h4>Fecha</h4>
+            <p-calendar 
+                formControlName="fecha"
+                [minDate]="minDate"
+                touchUI="true"
+                dateFormat="dd/mm/yy"
+                placeholder="Seleccione un dia a agendar"
+                styleClass="w-full"
+                    />
+        </section>
+
+        <section>
+            <h4>Hora</h4>
+            <p-calendar
+                formControlName="hora" 
+                [timeOnly]="true"
+                styleClass="w-full"
+                />
+        </section>
+
+        <section>
+            <p-button [disabled]="form.invalid" type="submit" label="Actualizar hora" [raised]="true" severity="contrast" styleClass="w-full mt-6" />
+        </section>
+</form>

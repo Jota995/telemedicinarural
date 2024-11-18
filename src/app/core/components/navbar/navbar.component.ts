@@ -11,6 +11,7 @@ import { UserService } from '../../services/user.service';
 import { Observable } from 'rxjs';
 import { User } from '../../models/user.model';
 import { Router } from '@angular/router';
+import { RxDatabaseService } from '../../services/database.service';
 
 @Component({
   selector: 'app-navbar',

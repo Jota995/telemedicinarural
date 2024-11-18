@@ -1,6 +1,20 @@
 <div class="flex flex-column p-3">
     <h1>Agenda Medica</h1>
+    <section class="flex flex-column gap-2">
+        <p-button pButton icon="pi pi-filter" iconPos="right" label="Filtro" size="small"/>
+
+        @for (item of agendaMedica; track $index) {
+            <div class="p-card flex flex-column gap-2 p-3">
+                <span><b>Especialidad:</b> {{item?.especialidad}}</span>
+                <span><b>Fecha:</b> {{ item?.fecha | date: 'dd/MM/yyyy' }} - {{ item?.fecha | date: 'shortTime' }}</span>
+                <span><b>Estado:</b> {{item.estado}}</span>
+            </div>
+        }
+        @empty {
+            <h4>No hay citas registradas.</h4>
+        }
+    </section>
     <section class="mt-5">
-        <p-button routerLink="/app/agenda-medica/registrar" label="Agendar cita medica" severity="contrast" styleClass="w-full" />        
+        <p-button routerLink="/app/agenda-medica/registrar" label="Registrar nueva agenda" severity="contrast" styleClass="w-full" />        
     </section>
 </div>
