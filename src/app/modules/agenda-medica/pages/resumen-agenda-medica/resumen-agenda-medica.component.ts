@@ -1,7 +1,7 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, Input, input, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
-import { AgendaService } from '../../../../core/services/agenda.service';
+import { AgendaQueryParams, AgendaService } from '../../../../core/services/agenda.service';
 import { AgendaType } from '../../../../core/models/agenda.model';
 import { DatePipe } from '@angular/common';
 
@@ -14,19 +14,32 @@ import { DatePipe } from '@angular/common';
   providers:[AgendaService]
 })
 export class ResumenAgendaMedicaComponent implements OnInit {
+
+  @Input() especialidad:string | undefined = undefined;
+  @Input() estado:"disponible"| "cancelada"| "completada"| "no_asistida"| "pendiente" | undefined = undefined;
+  @Input() fechaDesde:Date | undefined = undefined
+  @Input() fechaHasta:Date | undefined = undefined
   
   private agendaService = inject(AgendaService)
 
   public agendaMedica:Array<AgendaType> = []
 
   ngOnInit(): void {
+
+    const query:AgendaQueryParams = {
+      especialidad:this.especialidad,
+      estado:this.estado,
+      fechaDesde:this.fechaDesde,
+      fechaHasta:this.fechaHasta
+    } 
+
     this.agendaService
-      .obtenerAgendas({})
+      .obtenerAgendas(query)
       .then((agenda) =>{
         this.agendaMedica = agenda;
       })
       .catch(error =>{
-        console.log("error al obtener agenda medica")
+        console.log("error al obtener agenda medica",error)
       })
   }
 }

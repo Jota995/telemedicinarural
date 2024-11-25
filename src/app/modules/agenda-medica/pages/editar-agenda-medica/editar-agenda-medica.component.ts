@@ -81,6 +81,8 @@ export class EditarAgendaMedicaComponent implements OnInit{
   patchForm(agenda:AgendaType){
     var fechaHora = splitDateTime(agenda.fecha ?? '');
 
+    console.log("fecha", fechaHora)
+
     this.form.patchValue({
       idDoctor:agenda.idDoctor,
       especialidadMedica:agenda.especialidad,

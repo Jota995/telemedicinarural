@@ -12,5 +12,9 @@ export const routes: Routes = [
     {
         path:'editar/:id',
         loadComponent: () => import('./pages/editar-agenda-medica/editar-agenda-medica.component').then(m => m.EditarAgendaMedicaComponent)
+    },
+    {
+        path:'filtrar',
+        loadComponent:() => import('./pages/filtrar-agenda-medica/filtrar-agenda-medica.component').then(m => m.FiltrarAgendaMedicaComponent)
     }
 ];

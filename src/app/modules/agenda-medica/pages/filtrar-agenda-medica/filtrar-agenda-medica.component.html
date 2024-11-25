@@ -1,0 +1,37 @@
+<form [formGroup]="form" class="p-3" (ngSubmit)="onSubmit()" class="flex flex-column p-3">
+    <h1>Filtrar Agenda Medica</h1>
+
+    <section>
+        <h4>Especialidad medica</h4>
+        <p-dropdown 
+        formControlName="especialidad" 
+        [options]="especialidadesdMedicasDoctor" 
+        placeholder="Seleccione una especialidad medica" 
+        styleClass="w-full"/>
+    </section>
+
+    <section>
+        <h4>Rango Fecha</h4>
+        <p-calendar 
+            formControlName="fecha"
+            touchUI="true"
+            dateFormat="dd/mm/yy"
+            selectionMode="range"
+            placeholder="Seleccione un rango de fechas"
+            styleClass="w-full"
+                />
+    </section>
+
+    <section>
+        <h4>Estado</h4>
+        <p-dropdown 
+        formControlName="estado" 
+        [options]="estadosCitaMedica" 
+        placeholder="Seleccione un estado" 
+        styleClass="w-full"/>
+    </section>
+
+    <section>
+        <p-button [disabled]="form.invalid" type="submit" label="Filtrar" [raised]="true" severity="contrast" styleClass="w-full mt-6" />
+    </section>
+</form>

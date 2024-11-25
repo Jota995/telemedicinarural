@@ -180,17 +180,17 @@ async function createDatabase():Promise<any>{
             }
         )
         
-        replicationStateDoctores.error$.subscribe(erro =>{
-            console.log("error replication doctor",erro)
-        })
+        // replicationStateDoctores.error$.subscribe(erro =>{
+        //     console.log("error replication doctor",erro)
+        // })
     
-        replicationStateAgendaMedica.error$.subscribe(error =>{
-            console.log("ocurrio un error en agenda replication\n",error)
-        })
+        // replicationStateAgendaMedica.error$.subscribe(error =>{
+        //     console.log("ocurrio un error en agenda replication\n",error)
+        // })
 
-        replicationStateCitas.error$.subscribe(error =>{
-            console.log("ocurrio un error cita medica",error)
-        })
+        // replicationStateCitas.error$.subscribe(error =>{
+        //     console.log("ocurrio un error cita medica",error)
+        // })
     
     
         return database;

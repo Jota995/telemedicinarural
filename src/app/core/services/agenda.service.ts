@@ -7,6 +7,10 @@ import { ObjectId } from 'bson';
 export type AgendaQueryParams = {
   idDoctor?:string
   idsAgendas?:Array<string>
+  estado?:"disponible"| "cancelada"| "completada"| "no_asistida"| "pendiente"
+  especialidad?:string
+  fechaDesde?:Date,
+  fechaHasta?:Date
 }
 
 @Injectable({
@@ -18,16 +22,27 @@ export class AgendaService {
 
   constructor() { }
 
-  async obtenerAgendas({idsAgendas, idDoctor}:AgendaQueryParams):Promise<Array<AgendaType>>{
+  async obtenerAgendas({idsAgendas, idDoctor,estado,especialidad,fechaDesde,fechaHasta}:AgendaQueryParams):Promise<Array<AgendaType>>{
+    console.log("query \n",idsAgendas, idDoctor,estado,especialidad,fechaDesde,fechaHasta)
     const arrayAgenda:Array<AgendaType> = [];
 
-    console.log("ids agenda",idsAgendas)
+    const selector:any = {
+      ...(idsAgendas && { id: { $in: idsAgendas } }),
+      ...(idDoctor && {idDoctor}),
+      ...(estado && {estado}),
+      ...(especialidad && {especialidad})
+    }
+
+    if (fechaDesde && fechaHasta) {
+      selector.fecha = {
+        $gte: fechaDesde,
+        $lte: fechaHasta
+      };
+    }
+
 
     const rxAgendas = await this.dbService.db.agenda.find({
-      selector:{
-        ...(idsAgendas && { id: { $in: idsAgendas } }),
-        ...(idDoctor && {idDoctor})
-      }
+      selector
     })
     .exec();
 

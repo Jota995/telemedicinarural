@@ -2,48 +2,24 @@
     <h1>Citas Medicas</h1>
     <section class="flex flex-column gap-2">
         <h3>Consultar citas</h3>
-        <div class="flex gap-2 overflow-scroll">
-            <a routerLink="/app/citas-medicas/periodo/dia" class="p-card p-3" [style]="{ width: '160px'}">
-                <div class="flex flex-column align-items-center gap-2">
-                 <p-avatar 
-                 label="P" 
-                 styleClass="mr-2" 
-                 size="large" 
-                 shape="circle" />
-                 <small>
-                     Citas del dia
-                 </small>
-                </div>
-            </a>
-            <a  routerLink="/app/citas-medicas/periodo/semana" class="p-card p-3" [style]="{ width: '160px'}">
-            <div class="flex flex-column align-items-center gap-2">
-                <p-avatar 
-                label="P" 
-                styleClass="mr-2" 
-                size="large" 
-                shape="circle" />
-                <small class="text-center">
-                    Citas de la semana
-                </small>
-            </div>
-            </a>
-            <a  routerLink="/app/citas-medicas/periodo/mes" class="p-card p-3" [style]="{ width: '160px'}">
-            <div class="flex flex-column align-items-center gap-2">
-                <p-avatar 
-                label="P" 
-                styleClass="mr-2" 
-                size="large" 
-                shape="circle" />
-                <small>
-                    Citas del mes
-                </small>
-            </div>
-            </a>
+        <div class="flex gap-2 overflow-scroll p-1">
+            @for (item of consultarCitas; track $index) {
+                <a [routerLink]="item.link" class="p-card p-3 flex flex-column align-items-center gap-2 no-underline text-center" [style]="{ width: '160px'}">
+                    <p-avatar 
+                    [icon]="item.icon" 
+                    styleClass="mr-2" 
+                    size="large" 
+                    shape="circle" />
+                    <small>
+                        {{item.label}}
+                    </small>
+                </a>
+            }
         </div>
     </section>
     <section>
         <h3>Proximas Citas</h3>
-        <div class="flex gap-2 overflow-scroll">
+        <div class="flex gap-2 overflow-scroll p-1">
             @for (cita of proximasCitas ; track $index) {
                 <p-card [style]="{ width: '160px', height:'20' }">
                     <ng-template pTemplate="content" >

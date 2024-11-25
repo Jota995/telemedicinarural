@@ -24,6 +24,24 @@ export class ResumenCitasComponent implements OnInit{
   public citasProgramadasEnElMes!:Observable<number>;
   public proximasCitas:Array<CitaType> = [] ;
 
+  public consultarCitas = [
+    {
+      icon:'pi pi-calendar-clock',
+      label:'Citas del dia',
+      link:'/app/citas-medicas/periodo/dia'
+    },
+    {
+      icon:'pi pi-calendar',
+      label:'Citas de la semana',
+      link:'/app/citas-medicas/periodo/semana'
+    },
+    {
+      icon:'pi pi-calendar-times',
+      label:'Citas del mes',
+      link:'/app/citas-medicas/periodo/mes'
+    }
+  ]
+
   ngOnInit(): void {
     this.citasProgramadasEnElMes = this.citaService
       .citasDelMes()
