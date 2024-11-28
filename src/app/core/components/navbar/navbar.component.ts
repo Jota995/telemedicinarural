@@ -34,7 +34,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     console.log("navbar on init")
-    this.user$= this.userService.getUser();
+    this.user$= this.userService.getUser$();
 
     this.items = [
         {

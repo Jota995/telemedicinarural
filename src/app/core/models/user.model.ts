@@ -3,4 +3,6 @@ export interface User{
     Name:string;
     UserId:string;
     Role:string;
+    IdPaciente?:string;
+    IdDoctor?:string;
 }

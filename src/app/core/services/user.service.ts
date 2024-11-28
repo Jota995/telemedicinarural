@@ -10,6 +10,7 @@ import { JwtHelperService } from '@auth0/angular-jwt';
 export class UserService {
   private user!:BehaviorSubject<User>;
   private authService = inject(AuthService);
+  private userValue:User | null = null;
 
   constructor() { 
     if(!this.authService.isAuthenticated() || !this.authService.getUserBearerToken())
@@ -20,18 +21,26 @@ export class UserService {
 
     console.log("token payload",tokenPayload)
 
-    const user:User = {
+    this.userValue = {
       UserId: tokenPayload?.Sub,
       Email: tokenPayload?.email,
       Name: tokenPayload?.name,
-      Role: tokenPayload?.Role
+      Role: tokenPayload?.Role,
+      IdDoctor: tokenPayload?.idDoctor,
+      IdPaciente: tokenPayload?.idPaciente
     }
 
-    this.user = new BehaviorSubject<User>(user)
+    console.log("usuario registrado", this.userValue)
+
+    this.user = new BehaviorSubject<User>(this.userValue)
   }
 
-  getUser(){
+  getUser$(){
     return this.user.asObservable();
+  }
+
+  getUserValue(){
+    return this.userValue
   }
 
   getTokenPayload(token:string| null){

@@ -15,6 +15,7 @@ import { DoctorParamsQuery, DoctorService } from '../../../../core/services/doct
 import { CitaService } from '../../../../core/services/cita.service';
 import { DoctorType } from '../../../../core/models/doctor.model';
 import {combinarFechas} from '../../../../shared/helpers'
+import { UserService } from '../../../../core/services/user.service';
 
 
 @Component({
@@ -23,7 +24,7 @@ import {combinarFechas} from '../../../../shared/helpers'
   imports: [ButtonModule,DropdownModule,InputTextareaModule,CalendarModule,ReactiveFormsModule],
   templateUrl: './agendar-cita.component.html',
   styleUrl: './agendar-cita.component.css',
-  providers:[DoctorService,CitaService,FormBuilder,AlertService]
+  providers:[DoctorService,CitaService,FormBuilder,AlertService, UserService]
 })
 export class AgendarCitaComponent implements OnInit {
   private alertService = inject(AlertService)
@@ -31,6 +32,9 @@ export class AgendarCitaComponent implements OnInit {
   private fb = inject(FormBuilder);
   private citaService = inject(CitaService)
   private doctorService = inject(DoctorService)
+  private userService = inject(UserService)
+
+  private userValue = this.userService.getUserValue();
 
   public form!:FormGroup
 
@@ -62,7 +66,7 @@ export class AgendarCitaComponent implements OnInit {
 
   buildForm():FormGroup{
     const form = this.fb.group({
-      idPaciente:['672acd563f1c484bdf031481',[Validators.required]],
+      idPaciente:[this.userValue?.IdPaciente,[Validators.required]],
       especialidad:[null,[Validators.required]],
       idDoctor:[null,[Validators.required]],
       fecha:[null,[Validators.required]],
