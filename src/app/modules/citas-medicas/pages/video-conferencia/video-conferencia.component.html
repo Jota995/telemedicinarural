@@ -1,0 +1,51 @@
+<div class="video-call-container">
+  <!-- Pantalla remota -->
+  <div class="video-main">
+    <video #remoteVideo autoplay playsinline></video>
+  </div>
+
+  <!-- Vista propia (PiP) -->
+  <div class="video-pip">
+    <video #localVideo autoplay playsinline muted></video>
+  </div>
+
+  <!-- Botones de control -->
+  <div class="call-controls">
+    <p-button *ngIf="!callInProgress && !incomingCall" 
+            (click)="startCall()"  
+            label="Iniciar Llamada" 
+            icon="pi pi-phone" 
+            class="p-button-success">
+    </p-button>
+    <div *ngIf="callInProgress">
+      <p-button (click)="stopCall()"  
+              [rounded]="true"
+              icon="bi bi-telephone-x-fill" 
+              class="p-button-danger">
+      </p-button>
+      <p-button 
+            (click)="toggleAudio()"
+            [rounded]="true"
+            [icon]="audioEnabled ? 'bi bi-mic-fill' : 'bi bi-mic-mute-fill'" 
+            class="p-button-rounded p-button-warning">
+      </p-button>
+      <p-button (click)="toggleCamera()"  
+              [icon]="videoEnabled ? 'bi bi-camera-video-fill' : 'bi bi-camera-video-off-fill'" 
+              [rounded]="true"
+              class="p-button-rounded p-button-warning">
+      </p-button>
+    </div>
+    <div *ngIf="incomingCall">
+      <p-button (click)="aceptCall()"  
+              label="Aceptar" 
+              icon="pi pi-check" 
+              class="p-button-success">
+      </p-button>
+      <p-button (click)="rejectCall()"  
+              label="Rechazar" 
+              icon="pi pi-times" 
+              class="p-button-danger">
+      </p-button>
+    </div>
+  </div>
+</div>

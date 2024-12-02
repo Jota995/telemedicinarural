@@ -14,6 +14,10 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/agendar-cita/agendar-cita.component').then(mod => mod.AgendarCitaComponent)
     },
     {
+        path:'conferencia/:id',
+        loadComponent: () => import('./pages/video-conferencia/video-conferencia.component').then(mod => mod.VideoConferenciaComponent)
+    },
+    {
         path:'',
         redirectTo:'/app/agenda/resumen',
         pathMatch:'full'
