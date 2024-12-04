@@ -1,13 +1,16 @@
 import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
-import { io, Socket } from 'socket.io-client';
 import { MediaServiceService } from '../../services/media-service.service';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
+import { DropdownModule } from 'primeng/dropdown';
+import { FormsModule } from '@angular/forms';
+
 
 @Component({
   selector: 'app-video-conferencia',
   standalone: true,
-  imports: [CommonModule,ButtonModule],
+  imports: [CommonModule,ButtonModule,DialogModule,DropdownModule,FormsModule],
   templateUrl: './video-conferencia.component.html',
   styleUrl: './video-conferencia.component.css',
   providers:[MediaServiceService]
@@ -25,6 +28,14 @@ export class VideoConferenciaComponent implements OnInit {
 
   supportedConstraints:any = {};
   trackCapabilities:MediaTrackCapabilities | null = null;
+
+  configVisible: boolean = false;
+
+  microfono:{}|undefined = undefined;
+  microfonos:Array<{}> | undefined = []
+
+  audifino:{}|undefined = undefined;
+  audifonos:Array<{}> | undefined = []
   
   private webRTCService = inject(MediaServiceService)
 
@@ -41,9 +52,14 @@ export class VideoConferenciaComponent implements OnInit {
       this.webRTCService.remoteStream.subscribe((remoteStream) =>{
         if(this.remoteVideo) this.remoteVideo.nativeElement.srcObject = remoteStream
       })
+
+      this.microfonos = await this.webRTCService.getAvailableMicrophones();
+      this.audifonos = await this.webRTCService.getAvailableAudioOutputs()
+
     } catch (error) {
       console.log("Error inizialating media :",error)
     }
+    
   }
 
   startCall(){
@@ -82,6 +98,27 @@ export class VideoConferenciaComponent implements OnInit {
 
   toggleAudio() {
     this.audioEnabled = this.webRTCService.toggleAudio();
+  }
+
+  showSettings(){
+    this.configVisible = true;
+  }
+
+  changeMicro(selectedMicro:any){
+    try {
+      this.webRTCService.changeMicrophone(selectedMicro.id)
+    } catch (error) {
+      console.error("error al cambiar microfono")
+    }
+  }
+
+  changeAudio(selectedAudio:any){
+    try {
+      if(this.localVideo){}
+      this.webRTCService.changeAudioOutput(this.localVideo?.nativeElement as HTMLMediaElement,selectedAudio.id)
+    } catch (error) {
+      console.error("error al cambiar audio")
+    }
   }
 
   

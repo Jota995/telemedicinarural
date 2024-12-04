@@ -144,5 +144,81 @@ export class MediaServiceService {
     }
     return false;
   }
+
+  async getAvailableMicrophones(): Promise<{ id: string; name: string }[]> {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const microphones = devices
+        .filter((device) => device.kind === 'audioinput')
+        .map((device) => ({ id: device.deviceId, name: device.label || 'Micrófono sin nombre' }));
+      return microphones;
+    } catch (error) {
+      console.error('Error al obtener dispositivos de audio:', error);
+      return [];
+    }
+  }
+
+  async changeMicrophone(deviceId: string): Promise<void> {
+    try {
+      if (!this.localStream) {
+        throw new Error('El stream local no está inicializado.');
+      }
+  
+      // Detener la pista de audio actual
+      const audioTrack = this.localStream.getAudioTracks()[0];
+      if (audioTrack) {
+        audioTrack.stop();
+        this.localStream.removeTrack(audioTrack);
+      }
+  
+      // Obtener un nuevo stream con el micrófono seleccionado
+      const newAudioStream = await navigator.mediaDevices.getUserMedia({
+        audio: { deviceId: { exact: deviceId } },
+      });
+  
+      // Reemplazar la pista en el stream local
+      const newAudioTrack = newAudioStream.getAudioTracks()[0];
+      this.localStream.addTrack(newAudioTrack);
+  
+      // Si la conexión está activa, reemplazar la pista en el peer connection
+      if (this.peerConnection) {
+        const sender = this.peerConnection
+          .getSenders()
+          .find((s) => s.track?.kind === 'audio');
+        if (sender) {
+          sender.replaceTrack(newAudioTrack);
+        }
+      }
+    } catch (error) {
+      console.error('Error al cambiar el micrófono:', error);
+      throw error;
+    }
+  }
+
+  async getAvailableAudioOutputs(): Promise<{ id: string; name: string }[]> {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const audioOutputs = devices
+        .filter((device) => device.kind === 'audiooutput')
+        .map((device) => ({ id: device.deviceId, name: device.label || 'Salida sin nombre' }));
+      return audioOutputs;
+    } catch (error) {
+      console.error('Error al obtener dispositivos de salida de audio:', error);
+      return [];
+    }
+  }
+  
+  changeAudioOutput(element: HTMLMediaElement, deviceId: string): void {
+    if (!('setSinkId' in element)) {
+      console.warn('El navegador no soporta setSinkId.');
+      return;
+    }
+  
+    element.setSinkId(deviceId).then(() => {
+      console.log(`Salida de audio cambiada a: ${deviceId}`);
+    }).catch((error) => {
+      console.error('Error al cambiar la salida de audio:', error);
+    });
+  }
   
 }

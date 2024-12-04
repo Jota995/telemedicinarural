@@ -6,7 +6,7 @@
 
   <!-- Vista propia (PiP) -->
   <div class="video-pip">
-    <video #localVideo autoplay playsinline muted></video>
+    <video #localVideo autoplay playsinline></video>
   </div>
 
   <!-- Botones de control -->
@@ -34,6 +34,11 @@
               [rounded]="true"
               class="p-button-rounded p-button-warning">
       </p-button>
+      <p-button (click)="showSettings()"  
+              [icon]="'bi bi-gear-fill'" 
+              [rounded]="true"
+              class="p-button-rounded p-button-warning">
+      </p-button>
     </div>
     <div *ngIf="incomingCall">
       <p-button (click)="aceptCall()"  
@@ -48,4 +53,29 @@
       </p-button>
     </div>
   </div>
+  <p-dialog header="Edit Profile" [modal]="true" [(visible)]="configVisible">
+    <span class="p-text-secondary block mb-5">Configuracion</span>
+    <div class="flex align-items-center gap-3 mb-3">
+        <label class="font-semibold w-6rem">Microfono</label>
+        <p-dropdown 
+          [options]="microfonos" 
+          [(ngModel)]="microfono"
+          (onChange)="changeMicro($event)"
+          optionLabel="name"
+          placeholder="Seleccione un microfono" />
+    </div>
+    <div class="flex align-items-center gap-3 mb-5">
+      <label class="font-semibold w-6rem">Salida de Audio</label>
+      <p-dropdown 
+        [options]="audifonos" 
+        [(ngModel)]="audifino"
+        (onChange)="changeAudio($event)"
+        optionLabel="name"
+        placeholder="Seleccione un microfono" />
+    </div>
+    <div class="flex justify-content-end gap-2">
+        <p-button label="Cancel" severity="secondary" (onClick)="configVisible = false" />
+        <p-button label="Save" (onClick)="configVisible = false" />
+    </div>
+</p-dialog>
 </div>
