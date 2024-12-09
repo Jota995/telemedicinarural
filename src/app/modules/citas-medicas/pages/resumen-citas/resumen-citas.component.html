@@ -21,17 +21,13 @@
         <h3>Proximas Citas</h3>
         <div class="flex gap-2 overflow-scroll p-1">
             @for (cita of proximasCitas ; track $index) {
-                <p-card [style]="{ width: '160px', height:'20' }">
-                    <ng-template pTemplate="content" >
-                        <div class="flex flex-column align-items-center gap-2">
-                            <p-avatar 
-                                label="P" 
-                                styleClass="mr-2" 
-                                shape="circle" />
-                                <small>{{ cita?.fecha | date: 'dd/MM/yyyy' }} - {{ cita?.fecha | date: 'shortTime' }}</small>
-                        </div>
-                    </ng-template>
-                </p-card>
+                <a routerLink="/app/citas-medicas/conferencia/{{cita.id}}" class="p-card p-3 flex flex-column justify-content-center align-items-center gap-2 no-underline text-center" [style]="{ width: '170px',height:'140px'}">
+                    <p-avatar 
+                        label="P" 
+                        styleClass="mr-2" 
+                        shape="circle" />
+                    <small>{{ cita?.fecha | date: 'dd/MM/yyyy' }} - {{ cita?.fecha | date: 'shortTime' }}</small>
+                </a>
             }
             @empty {
                 <p>No hay citas registradas.</p>

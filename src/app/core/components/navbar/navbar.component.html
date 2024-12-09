@@ -28,7 +28,12 @@
                 <p-avatar image="https://primefaces.org/cdn/primeng/images/demo/avatar/walter.jpg" shape="circle" />
                 <div  class="flex flex-column">
                     <span>{{userData.Name}}</span>
-                    <small>{{userData.Role}}</small>
+                    @if(userData?.IdDoctor){
+                        <small>Doctor</small>
+                    }
+                    @else {
+                        <small>Paciente</small>
+                    }
                 </div>
                 <p-button [text]="true" [rounded]="true" icon="pi pi-angle-down" severity="secondary" (onClick)="menuUser.toggle($event)" />
                 <p-tieredMenu #menuUser [model]="userItems" [popup]="true" />

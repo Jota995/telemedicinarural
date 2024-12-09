@@ -41,7 +41,7 @@
       </p-button>
     </div>
     <div *ngIf="incomingCall">
-      <p-button (click)="aceptCall()"  
+      <p-button (click)="acceptCall()"  
               label="Aceptar" 
               icon="pi pi-check" 
               class="p-button-success">
@@ -53,23 +53,28 @@
       </p-button>
     </div>
   </div>
-  <p-dialog header="Edit Profile" [modal]="true" [(visible)]="configVisible">
-    <span class="p-text-secondary block mb-5">Configuracion</span>
-    <div class="flex align-items-center gap-3 mb-3">
-        <label class="font-semibold w-6rem">Microfono</label>
+  <p-dialog 
+    header="Configuracion" 
+    [modal]="true"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" 
+    [(visible)]="configVisible">
+    <div class="flex flex-column gap-3 mb-3">
+        <label class="font-semibold w-full">Microfono</label>
         <p-dropdown 
           [options]="microfonos" 
           [(ngModel)]="microfono"
           (onChange)="changeMicro($event)"
+          styleClass="w-full"
           optionLabel="name"
           placeholder="Seleccione un microfono" />
     </div>
-    <div class="flex align-items-center gap-3 mb-5">
-      <label class="font-semibold w-6rem">Salida de Audio</label>
+    <div class="flex flex-column gap-3 mb-3">
+      <label class="font-semibold w-full">Salida de Audio</label>
       <p-dropdown 
         [options]="audifonos" 
         [(ngModel)]="audifino"
         (onChange)="changeAudio($event)"
+        styleClass="w-full"
         optionLabel="name"
         placeholder="Seleccione un microfono" />
     </div>

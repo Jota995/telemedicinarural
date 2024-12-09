@@ -1,102 +1,119 @@
 import { EventEmitter, Injectable } from '@angular/core';
-import { io,Socket } from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class MediaServiceService {
-
-  private socket:Socket;
-  private peerConnection!:RTCPeerConnection;
-  private localStream!:MediaStream;
+  private socket: Socket;
+  private peerConnection!: RTCPeerConnection;
+  private localStream!: MediaStream;
 
   public incomingCall = new EventEmitter<void>();
   public callAccepted = new EventEmitter<MediaStream>();
   public remoteStream = new EventEmitter<MediaStream>();
 
   constructor() {
-    this.socket = io('http://localhost:3000');
-    this.initializateSocketEvents();
+    this.socket = io('http://localhost:3000'); // URL del servidor Socket.IO
   }
 
-  async initializateMedia(){
-    try {
-      this.localStream = await navigator.mediaDevices.getUserMedia({video:true,audio:true})
-      return this.localStream;
-    } catch (error) {
-      console.log("error accesing media devices",error)
-      throw error;
-    }
+  async initializeMedia(): Promise<MediaStream> {
+    const constraints = {
+      audio: true,
+      video: {
+        width: { ideal: 640 },
+        height: { ideal: 360 },
+        frameRate: { ideal: 15, max: 30 },
+      },
+    };
+
+    this.localStream = await navigator.mediaDevices.getUserMedia(constraints);
+    return this.localStream;
   }
 
-  initializateSocketEvents() {
-    this.socket.on('offer',async (offer) =>{
-      console.log("Recived offer")
+  joinRoom(roomId: string): void {
+    this.socket.emit('join-room', roomId);
+    console.log(`Unido a la sala: ${roomId}`);
+    this.initializeSocketEvents(roomId);
+  }
+
+  private initializeSocketEvents(roomId: string): void {
+    this.socket.on('offer', async (data) => {
+      const { offer } = data;
+      console.log('Oferta recibida');
       this.incomingCall.emit();
-      await this.createPeerConnection();
+      await this.createPeerConnection(roomId);
       await this.peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
     });
 
-    this.socket.on('answer',(answer) =>{
-      console.log("Answer recived");
+    this.socket.on('answer', (data) => {
+      const { answer } = data;
+      console.log('Respuesta recibida');
       this.peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
-
     });
 
-    this.socket.on('candidate', (candidate) =>{
-      console.log("Ice candidate recived")
+    this.socket.on('candidate', (data) => {
+      const { candidate } = data;
+      console.log('Candidato ICE recibido');
       this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
     });
-
   }
 
-  createPeerConnection() {
+  private async createPeerConnection(roomId: string): Promise<void> {
     this.peerConnection = new RTCPeerConnection({
-      iceServers:[{urls:'stun:stun.l.google.com:19302'}]
-    })
+      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+    });
 
-    this.peerConnection.onicecandidate = (event) =>{
-      if(event.candidate) this.socket.emit('candidate',event.candidate)
-    }
+    this.peerConnection.onicecandidate = (event) => {
+      if (event.candidate) {
+        this.socket.emit('candidate', { roomId, candidate: event.candidate });
+      }
+    };
 
-    this.peerConnection.ontrack = (event) =>{
-      console.log("setting remote stream")
-      this.remoteStream.emit(event.streams[0])
-    }
+    this.peerConnection.ontrack = (event) => {
+      console.log('Stream remoto recibido');
+      this.remoteStream.emit(event.streams[0]);
+    };
   }
 
-  async startCall(){
-    await this.createPeerConnection();
-    this.localStream.getTracks().forEach(track => this.peerConnection.addTrack(track,this.localStream));
+  async startCall(roomId: string): Promise<void> {
+    await this.createPeerConnection(roomId);
+    this.localStream.getTracks().forEach((track) =>
+      this.peerConnection.addTrack(track, this.localStream)
+    );
+
     const offer = await this.peerConnection.createOffer();
     await this.peerConnection.setLocalDescription(offer);
-    this.socket.emit('offer',this.peerConnection.localDescription)
+    this.socket.emit('offer', { roomId, offer: this.peerConnection.localDescription });
   }
 
-  async acceptCall(){
-    this.localStream.getTracks().forEach(track => this.peerConnection.addTrack(track,this.localStream));
+  async acceptCall(roomId: string): Promise<void> {
+    this.localStream.getTracks().forEach((track) =>
+      this.peerConnection.addTrack(track, this.localStream)
+    );
+
     const answer = await this.peerConnection.createAnswer();
     await this.peerConnection.setLocalDescription(answer);
-    this.socket.emit('answer',this.peerConnection.localDescription);
+    this.socket.emit('answer', { roomId, answer: this.peerConnection.localDescription });
   }
 
-  rejectCall(){
-    this.cleanUp()
+  rejectCall(): void {
+    this.cleanup();
   }
 
-  stopCall(){
-    this.cleanUp()
+  stopCall(): void {
+    this.cleanup();
 
-    if(this.localStream){
-      this.localStream.getTracks().forEach(track => track.stop())
+    if (this.localStream) {
+      this.localStream.getTracks().forEach((track) => track.stop());
     }
 
     this.remoteStream.emit(null as any);
   }
 
-  cleanUp(){
-    if(this.peerConnection){
-      this.peerConnection.close()
+  private cleanup(): void {
+    if (this.peerConnection) {
+      this.peerConnection.close();
       this.peerConnection = null as any;
     }
   }

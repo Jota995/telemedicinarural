@@ -5,6 +5,7 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { DropdownModule } from 'primeng/dropdown';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
 
 @Component({
@@ -36,56 +37,88 @@ export class VideoConferenciaComponent implements OnInit {
 
   audifino:{}|undefined = undefined;
   audifonos:Array<{}> | undefined = []
+
+  public idCita:string | null = null
   
   private webRTCService = inject(MediaServiceService)
+  private activateRotue = inject(ActivatedRoute)
+  
 
   async ngOnInit():Promise<void> {
     try {
-      this.localStream = await this.webRTCService.initializateMedia()
-    
-      if(this.localVideo) this.localVideo.nativeElement.srcObject = this.localStream;
 
-      this.webRTCService.incomingCall.subscribe(() =>{
-        this.incomingCall = true
-      })
+      this.idCita = this.activateRotue.snapshot.paramMap.get('id')
+      // Asegúrate de que el roomId esté disponible antes de inicializar
+      if (!this.idCita) {
+        console.error('Error: roomId no proporcionado.');
+        return;
+      }
 
-      this.webRTCService.remoteStream.subscribe((remoteStream) =>{
-        if(this.remoteVideo) this.remoteVideo.nativeElement.srcObject = remoteStream
-      })
+      // Unirse a la sala correspondiente
+      this.webRTCService.joinRoom(this.idCita);
 
+      // Inicializar la cámara/micrófono local
+      this.localStream = await this.webRTCService.initializeMedia();
+      if (this.localVideo) {
+        this.localVideo.nativeElement.srcObject = this.localStream;
+      }
+
+      // Suscribirse a eventos del servicio
+      this.webRTCService.incomingCall.subscribe(() => {
+        this.incomingCall = true;
+      });
+
+      this.webRTCService.remoteStream.subscribe((remoteStream) => {
+        if (this.remoteVideo) {
+          this.remoteVideo.nativeElement.srcObject = remoteStream;
+        }
+      });
+
+      // Cargar dispositivos disponibles
       this.microfonos = await this.webRTCService.getAvailableMicrophones();
-      this.audifonos = await this.webRTCService.getAvailableAudioOutputs()
-
+      this.audifonos = await this.webRTCService.getAvailableAudioOutputs();
     } catch (error) {
-      console.log("Error inizialating media :",error)
+      console.error('Error al inicializar el componente:', error);
     }
     
   }
 
-  startCall(){
-    this.webRTCService.startCall()
-    this.callInProgress = true;
+  startCall(): void {
+    if (this.idCita) {
+      this.webRTCService.startCall(this.idCita);
+      this.callInProgress = true;
+    } else {
+      console.error('No se puede iniciar la llamada sin un roomId.');
+    }
   }
 
-  aceptCall(){
-    this.webRTCService.acceptCall();
-    this.incomingCall = false;
-    this.callInProgress = true;
+  async acceptCall(): Promise<void> {
+    if (this.idCita) {
+      await this.webRTCService.acceptCall(this.idCita);
+      this.incomingCall = false;
+      this.callInProgress = true;
+    } else {
+      console.error('No se puede aceptar la llamada sin un roomId.');
+    }
   }
 
-  stopCall(){
-    this.webRTCService.startCall();
+  stopCall(): void {
+    this.webRTCService.stopCall();
     this.callInProgress = false;
 
-    if(this.localVideo) this.localVideo.nativeElement.srcObject = null;
+    if (this.localVideo) {
+      this.localVideo.nativeElement.srcObject = null;
+    }
   }
 
-  rejectCall(){
+  rejectCall(): void {
     this.webRTCService.rejectCall();
     this.incomingCall = false;
     this.callInProgress = false;
 
-    if(this.remoteVideo) this.remoteVideo.nativeElement.srcObject = null;
+    if (this.remoteVideo) {
+      this.remoteVideo.nativeElement.srcObject = null;
+    }
   }
 
   modifyVideoTrackSize(){
@@ -106,16 +139,17 @@ export class VideoConferenciaComponent implements OnInit {
 
   changeMicro(selectedMicro:any){
     try {
-      this.webRTCService.changeMicrophone(selectedMicro.id)
+      this.webRTCService.changeMicrophone(selectedMicro.value.id)
     } catch (error) {
       console.error("error al cambiar microfono")
     }
   }
 
   changeAudio(selectedAudio:any){
+    console.log("change audio",selectedAudio)
     try {
       if(this.localVideo){}
-      this.webRTCService.changeAudioOutput(this.localVideo?.nativeElement as HTMLMediaElement,selectedAudio.id)
+      this.webRTCService.changeAudioOutput(this.localVideo?.nativeElement as HTMLMediaElement,selectedAudio.value.id)
     } catch (error) {
       console.error("error al cambiar audio")
     }
