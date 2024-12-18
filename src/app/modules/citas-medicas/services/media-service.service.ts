@@ -83,18 +83,30 @@ export class MediaServiceService {
     );
 
     const offer = await this.peerConnection.createOffer();
-    await this.peerConnection.setLocalDescription(offer);
+    const modifiedSDP = this.prioritizeCodec(offer.sdp || "", "VP9"); // Cambia a H.264 si lo prefieres
+    const newOffer: RTCSessionDescriptionInit = { type: offer.type, sdp: modifiedSDP };
+    await this.peerConnection.setLocalDescription(newOffer);
     this.socket.emit('offer', { roomId, offer: this.peerConnection.localDescription });
+
+    // Ajustar parámetros del transmisor después de iniciar la llamada
+    this.adjustSenderParameters();
+
+    // Iniciar monitoreo de calidad de red
+    this.monitorNetworkQuality();
+    setInterval(() => this.adjustVideoQuality(), 50000); // Ajustar cada 10 segundos
   }
 
   async acceptCall(roomId: string): Promise<void> {
     this.localStream.getTracks().forEach((track) =>
       this.peerConnection.addTrack(track, this.localStream)
     );
-
+  
     const answer = await this.peerConnection.createAnswer();
     await this.peerConnection.setLocalDescription(answer);
     this.socket.emit('answer', { roomId, answer: this.peerConnection.localDescription });
+  
+    // Configurar simulcast después de aceptar la llamada
+    this.configureSimulcast();
   }
 
   rejectCall(): void {
@@ -237,5 +249,182 @@ export class MediaServiceService {
       console.error('Error al cambiar la salida de audio:', error);
     });
   }
+
+  prioritizeCodec(sdp: string, codec: string): string {
+    const lines = sdp.split("\r\n");
+    const mLineIndex = lines.findIndex(line => line.startsWith("m=video"));
+
+    if (mLineIndex === -1) return sdp;
+
+    const codecRegex = new RegExp(`a=rtpmap:(\\d+) ${codec}`);
+    const codecLine = lines.find(line => codecRegex.test(line));
+
+    if (codecLine) {
+      const codecPayload = codecLine.match(codecRegex)?.[1];
+      if (codecPayload) {
+        const mLine = lines[mLineIndex].split(" ");
+        const newMLine = [
+          ...mLine.slice(0, 3),
+          codecPayload,
+          ...mLine.slice(3).filter(payload => payload !== codecPayload),
+        ];
+        lines[mLineIndex] = newMLine.join(" ");
+      }
+    }
+
+    return lines.join("\r\n");
+  }
+
+  private adjustSenderParameters(): void {
+    const sender = this.peerConnection.getSenders().find(s => s.track?.kind === "video");
+
+    if (sender) {
+      const parameters = sender.getParameters();
+      if (!parameters.encodings) {
+        parameters.encodings = [{}];
+      }
+
+      // Ajustar parámetros como bitrate máximo
+      parameters.encodings[0].maxBitrate = 500_000; // 500 kbps
+      parameters.encodings[0].scaleResolutionDownBy = 1; // No reducir resolución
+
+      sender.setParameters(parameters).catch(console.error);
+    }
+  }
+
+  private configureSimulcast(): void {
+    const sender = this.peerConnection.getSenders().find(s => s.track?.kind === "video");
+  
+    if (sender) {
+      const parameters = sender.getParameters();
+  
+      // Inicializar encodings si no están definidas
+      if (!parameters.encodings || parameters.encodings.length === 0) {
+        parameters.encodings = [
+          { rid: "low" },
+          { rid: "medium" },
+          { rid: "high" }
+        ];
+      }
+  
+      // Establecer parámetros para simulcast
+      if (parameters.encodings.length >= 3) {
+        parameters.encodings[0].maxBitrate = 150_000; // Baja calidad (150 kbps)
+        parameters.encodings[1].maxBitrate = 300_000; // Media calidad (300 kbps)
+        parameters.encodings[2].maxBitrate = 800_000; // Alta calidad (800 kbps)
+      } else {
+        console.warn("Simulcast no soportado con múltiples encodings.");
+      }
+  
+      // Aplicar cambios a través de setParameters
+      sender.setParameters(parameters)
+        .then(() => console.log("Simulcast configurado correctamente"))
+        .catch(error => console.error("Error configurando simulcast:", error));
+    } else {
+      console.warn("No se encontró un transmisor de video para configurar simulcast.");
+    }
+  }
+
+
+  private monitorNetworkQuality(): void {
+    const sender = this.peerConnection.getSenders().find(s => s.track?.kind === "video");
+    
+    if (sender && sender.track) {
+      const videoTrack: MediaStreamTrack = sender.track; // Asegúrate de usar la pista asociada
+      console.log(`Track encontrada: ${videoTrack.kind}`);
+      // Ahora puedes trabajar con videoTrack como MediaStreamTrack
+    }
+  
+    const getStatsInterval = setInterval(() => {
+      this.peerConnection.getStats().then(stats => {
+        stats.forEach(report => {
+          if (report.type === "outbound-rtp" && report.kind === "video") {
+            const bitrate = (report.bytesSent * 8) / (report.timestamp / 1000); // Bitrate estimado en bits/segundo
+            console.log(`Bitrate: ${bitrate} bps`);
+          }
+          
+          if (report.type === "candidate-pair" && report.state === "succeeded") {
+            console.log(`Ancho de banda disponible: ${report.availableOutgoingBitrate} bps`);
+            console.log(`Tiempo de ida y vuelta: ${report.currentRoundTripTime} ms`);
+          }
+        });
+      }).catch(error => {
+        console.error("Error obteniendo estadísticas de conexión:", error);
+        clearInterval(getStatsInterval);
+      });
+    }, 5000); // Actualizar cada 5 segundos
+  }
+
+  private adjustVideoQuality(): void {
+    const sender = this.peerConnection.getSenders().find(s => s.track?.kind === "video");
+  
+    if (sender) {
+      const parameters = sender.getParameters();
+  
+      if (!parameters.encodings || parameters.encodings.length === 0) {
+        parameters.encodings = [{}];
+      }
+  
+      // Supongamos que usamos valores de ancho de banda disponible para ajustar
+      this.peerConnection.getStats().then(stats => {
+        stats.forEach(report => {
+          if (report.type === "candidate-pair" && report.state === "succeeded") {
+            const availableBitrate = report.availableOutgoingBitrate;
+  
+            // Ajustar bitrate con base en ancho de banda disponible
+            if (availableBitrate < 300_000) {
+              console.log("Red pobre: Ajustando a baja calidad");
+              parameters.encodings[0].maxBitrate = 150_000;
+            } else if (availableBitrate < 800_000) {
+              console.log("Red moderada: Ajustando a calidad media");
+              parameters.encodings[0].maxBitrate = 500_000;
+            } else {
+              console.log("Buena red: Ajustando a alta calidad");
+              parameters.encodings[0].maxBitrate = 1_500_000;
+            }
+  
+            sender.setParameters(parameters).then(() => {
+              console.log("Calidad de video ajustada");
+            }).catch(error => {
+              console.error("Error ajustando parámetros de video:", error);
+            });
+          }
+        });
+      });
+    } else {
+      console.warn("No se encontró un transmisor de video para ajustar la calidad.");
+    }
+  }
+
+  switchToAudioOnly(): void {
+    if (this.localStream) {
+      // Deshabilitar la pista de video
+      const videoTrack = this.localStream.getVideoTracks()[0];
+      if (videoTrack) {
+        videoTrack.enabled = false;
+      }
+  
+      // Mantener habilitada la pista de audio
+      const audioTrack = this.localStream.getAudioTracks()[0];
+      if (audioTrack) {
+        audioTrack.enabled = true;
+      }
+  
+      console.log("Modo solo micrófono activado");
+    }
+  }
+
+  switchToVideo(): void {
+    if (this.localStream) {
+      // Habilitar la pista de video
+      const videoTrack = this.localStream.getVideoTracks()[0];
+      if (videoTrack) {
+        videoTrack.enabled = true;
+      }
+  
+      console.log("Modo video completo activado");
+    }
+  }
+  
   
 }

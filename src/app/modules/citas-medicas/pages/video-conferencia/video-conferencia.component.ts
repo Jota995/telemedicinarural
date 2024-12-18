@@ -6,12 +6,14 @@ import { DialogModule } from 'primeng/dialog';
 import { DropdownModule } from 'primeng/dropdown';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { SplitButtonModule } from 'primeng/splitbutton';
+
 
 
 @Component({
   selector: 'app-video-conferencia',
   standalone: true,
-  imports: [CommonModule,ButtonModule,DialogModule,DropdownModule,FormsModule],
+  imports: [CommonModule,ButtonModule,DialogModule,DropdownModule,FormsModule,SplitButtonModule],
   templateUrl: './video-conferencia.component.html',
   styleUrl: './video-conferencia.component.css',
   providers:[MediaServiceService]
@@ -39,6 +41,20 @@ export class VideoConferenciaComponent implements OnInit {
   audifonos:Array<{}> | undefined = []
 
   public idCita:string | null = null
+
+  public modoConferencia:{modo:string} = {
+    modo:"Video y audio activados"
+  };
+
+  public modosVideoConferencia:Array<{}> = [
+    {
+      modo:"Solo activar audio"
+    },
+    {
+      modo:"Video y audio activados"
+    }
+    
+  ]
   
   private webRTCService = inject(MediaServiceService)
   private activateRotue = inject(ActivatedRoute)
@@ -153,6 +169,25 @@ export class VideoConferenciaComponent implements OnInit {
     } catch (error) {
       console.error("error al cambiar audio")
     }
+  }
+
+  changeModoConferencia(selectedMode:any){
+    const modoSeleccionado = selectedMode.value.modo
+    if(modoSeleccionado == "Solo activar audio"){
+      this.toggleToAudioOnly()
+    }
+    
+    if(modoSeleccionado == "Video y audio activados"){
+      this.toggleToVideo()
+    }
+  }
+
+  toggleToAudioOnly(){
+    this.webRTCService.switchToAudioOnly();
+  }
+
+  toggleToVideo(){
+    this.webRTCService.switchToVideo()
   }
 
   
