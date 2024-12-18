@@ -29,11 +29,13 @@
             [icon]="audioEnabled ? 'bi bi-mic-fill' : 'bi bi-mic-mute-fill'" 
             class="p-button-rounded p-button-warning">
       </p-button>
-      <p-button (click)="toggleCamera()"  
+      @if(modoConferencia.modo == 'Video y audio activados'){
+        <p-button (click)="toggleCamera()"  
               [icon]="videoEnabled ? 'bi bi-camera-video-fill' : 'bi bi-camera-video-off-fill'" 
               [rounded]="true"
               class="p-button-rounded p-button-warning">
       </p-button>
+      }
       <p-button (click)="showSettings()"  
               [icon]="'bi bi-gear-fill'" 
               [rounded]="true"
@@ -58,6 +60,16 @@
     [modal]="true"
     [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" 
     [(visible)]="configVisible">
+    <div class="flex flex-column gap-3 mb-3">
+      <label class="font-semibold w-full">Modo Conferencia</label>
+      <p-dropdown 
+        [options]="modosVideoConferencia" 
+        [(ngModel)]="modoConferencia"
+        (onChange)="changeModoConferencia($event)"
+        styleClass="w-full"
+        optionLabel="modo"
+        placeholder="Seleccione un microfono" />
+  </div>
     <div class="flex flex-column gap-3 mb-3">
         <label class="font-semibold w-full">Microfono</label>
         <p-dropdown 
